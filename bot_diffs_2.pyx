@@ -89,7 +89,9 @@ cdef class Bot(BaseBot):
                                     if value1 > value2 else
                                                 (2 if value2 > value3 else 3)))
             c_do_action(action)
-            memcpy(state2, state1, state_size)
+            state2, state1 = state1, state2
             memcpy(state1, state0, state_size)
 
+        self.state1 = state1
+        self.state2 = state2
         self.last_action = action

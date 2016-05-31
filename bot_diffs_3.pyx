@@ -103,9 +103,10 @@ cdef class Bot(BaseBot):
                                     if value1 > value2 else
                                                 (2 if value2 > value3 else 3)))
             c_do_action(action)
-            # TODO: One copy could be avoided?
-            memcpy(state3, state2, state_size)
-            memcpy(state2, state1, state_size)
+            state3, state2, state1 = state2, state1, state3
             memcpy(state1, state0, state_size)
 
+        self.state1 = state1
+        self.state2 = state2
+        self.state3 = state3
         self.last_action = action
