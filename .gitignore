@@ -1,9 +1,9 @@
 __pycache__/
-data/*
+data/*.npz
 interface*
-levels/*
+levels/*.data
 packs/*.gz
-params/*
+params/*.npz
 profiles/
 scores/
 notes.txt
