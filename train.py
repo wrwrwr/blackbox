@@ -1,52 +1,60 @@
 #!/usr/bin/env python3
 
 """
-To start a training session at least 3 things need to be given:
+The main bot-training command-line utility. To start a training session at
+least 3 things need to be chosen:
 
-* the bot to train, this should be a key such as ``linear` or ``diffs_1``;
-* the trainer that will carry out the training, say ``local`` or ``anneal``;
-* configuration for the trainer, a varying amount of additional arguments that
-  are passed to the trainer, the first one is usually the number of steps.
+* the bot to train, this should be a key such as linear or diffs_1;
+* the trainer that will carry out the training, say local or anneal;
+* configuration for the trainer, a varying amount of additional
+  arguments that are passed to the trainer, the first one is usually
+  the number of steps.
 
 After that many different options can be given, some notable are:
 
-``--iterations``:
+--iterations
     controls the count of full training sessions; best parameters from each one
-    are saved to ``params/<bot>_<index>.npz``;
-``--random_seeds`` and ``--stored_seeds``:
+    are saved to params/<bot>_<index>.npz;
+
+--random_seeds and --stored_seeds
     serve to choose the starting point, either the best params out of a random
     pool or a set loaded from a file;
-``--dist_new_param`` and ``--dist_vary_param``:
+
+--dist_new_param and --dist_vary_param
     can be used to specify a distribution for a parameter array generation or
     mutation, they take the name of the array and a SciPy stats distribution
     key and arguments;
-``--dist_variations``:
+
+--dist_variations
     determines the number of parameter variations to make at each trainer step,
     the more spread this one is the wider the search;
-``--dist_acceptance``:
+
+--dist_acceptance
     trainers such as anneal have a way of escaping local maxima by sometimes
     accepting a score decline, this distribution describes this process;
-``--emphasis``:
+
+--emphasis
     can be used to hint trainers that some components of state are more or less
     important than other;
-``--param_map``, ``--param_freeze``, and ``--param_scale``:
+
+--param_map, --param_freeze, and --param_scale
     are there to translate parts of a parameter set from one bot to another.
 
 A simple invocation could look as follows:
 
-    train.py linear local 1000
+    ./train.py linear local 1000
 
-It would make a thousand steps of the random local search trainer, starting
-from a random parameters for the linear bot. If this was the first run, the
-results would be saved as``params/linear_0.npz`.
+This would make a thousand steps of the random local search trainer, starting
+from a random parameters for the linear bot. If this was your first run, the
+results would be saved as params/linear_0.npz`.
 
 To start from a previous seed and emphasize the last state component ten-fold:
 
-    train.py linear local 1000 --stored_seed 0 --emphasis 36 10
+    ./train.py linear local 1000 --stored_seed 0 --emphasis 36 10
 
-And to now reuse your linear coefficients for the ``diffs_1`` bot:
+And to now reuse your linear coefficients for the diffs_1 bot:
 
-    train.py diffs_1 local 1000 -ss 1 -dnp diffs0l norm 0 .01
+    ./train.py diffs_1 local 1000 -ss 1 -dnp diffs0l norm 0 .01
 """
 from numpy import array
 

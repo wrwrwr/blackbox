@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 
 """
-A command-line tool for data processing.
+A command-line tool for data munging. Select a processor and feed it with data:
+
+    ./process.py stats srs_0
+
+Multiple inputs can be listed and processed together:
+
+    ./process.py stats srs_0 srs_1 srs_2
 """
 from init import initialize; initialize()
 from core import available_processors, do_process

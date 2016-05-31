@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 
 """
-A command-line params viewer.
+A command-line parameters viewer. Select a bot and a parameters set and see
+what's inside it:
+
+    ./view.py linear 0
+
+A training record is appended to the history kept with parameters after each
+session. Only the latest parameter values are stored in a single file; the
+trace lists keys of past sets, ask the viewer about them to see past entries.
+
+Reproducing training sessions using the stored pseudo-random generator seeds is
+limited to the same machine, the same NumPy version (the same random sequences
+from C's rand() and NumPy's rvs()), and the same toolkit version.
 """
 from collections import OrderedDict as odict
 from datetime import datetime

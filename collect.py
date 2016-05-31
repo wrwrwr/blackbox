@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 
 """
-A command-line tool for data collection.
+A command-line utility for gathering data. Only a collector name is required:
+
+    ./collect.py sas
+
+By default the random bot is used to wander across the training level. Another
+bot or level can be selected using --bot (name and params key) and --level.
+
+Collectors vary greatly in what they do. They usually have a matching processor
+or trainer that can make use of the collected data.
 """
 from init import initialize; initialize()
 from core import available_bots, available_collectors, do_collect
 from iop import date_desc, level_desc, parse_args, time_desc
 
-description = "Collect some data from a level."
+description = "Collect data from a level."
 arguments = (
     (('collector',), {
         'choices': available_collectors.keys(),

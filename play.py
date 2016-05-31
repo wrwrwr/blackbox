@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 
 """
-A command-line bot runner.
+A command-line bot runner. Takes a bot name and a parameters key:
+
+    ./play.py linear 0
+
+Bots can be run with parameter sets from other bots as long as they contain
+the needed params (matched by key):
+
+    ./play.py linear diffs_1_0
+
+Multiple parameter sets can be evaluated at once with a bit of shell magic:
+
+    ./play linear `ls params/linear_*.npz` --ignore-exceptions
 """
 from init import initialize; initialize()
 from core import available_bots, do_play
