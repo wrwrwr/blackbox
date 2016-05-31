@@ -1,0 +1,10 @@
+__pycache__/
+data/*
+interface*
+levels/*
+packs/*.gz
+params/*
+profiles/
+scores/
+notes.txt
+todo.txt
