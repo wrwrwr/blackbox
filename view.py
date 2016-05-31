@@ -52,9 +52,12 @@ if history:
             record['bot'] = 'states_1'
         elif record['bot'] == 'quadratic_1':
             record['bot'] = 'quadratic'
-        if (record['trainer'] == 'anneal' and
-                    record['date'] < datetime(2016, 5, 28, 10)):
-            record['trainer'] = 'local_dec'
+        if (record['trainer'] == 'local_dec' or
+                    record['trainer'] == 'anneal' and
+                                record['date'] < datetime(2016, 5, 28, 10)):
+            record['trainer'] = 'local_d'
+        if record['trainer'] == 'anneal_dec':
+            record['trainer'] = 'anneal'
         if 'config' not in record:
             record['config'] = "not saved"
         if 'real' not in record['dists']:
