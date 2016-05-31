@@ -2,8 +2,11 @@
 Linear regression with one set of coefficients for the first half of the level
 and another set for the second half.
 
-The phases parameter holds the breaks-points between coefficient sets (times).
-For this simple bot it is fixed with a single entry at the middle of the level.
+The phases meta-parameter holds the break-point between the two coefficient
+sets (by time fraction, where 0 is the beginning and 1 the end of a level).
+
+In place of this bot consider using linear_m in combination with the --phases
+option, or better yet with the comb trainer.
 
 Assumes 4 actions.
 """

@@ -355,7 +355,7 @@ def training_desc(info, verbosity, precision):
                 ", Scores: {}".format(scores_desc(info['scores'], verbosity,
                                                   precision))
     ]
-    if len(info['phases']) > 1:
+    if info['phases']:
         desc.insert(3, "Phases: {}".format(
                                     phases_desc(info['phases'], precision)))
     if info['emphases']:

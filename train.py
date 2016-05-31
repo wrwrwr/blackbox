@@ -121,9 +121,8 @@ arguments = (
     (('-ph', '--phases'), {
         'nargs': '+',
         'type': float,
-        'default': [],
-        'help': "use multiple parameter sets for a single level run; " +
-                "for example .25 .5 .75 splits levels into quarters" 
+        'help': "fix or override phase splits for a multi-param-sets bot; " +
+                "for example .25 .5 .75 divides levels into quarters"
     }),
     (('-rs', '--random_seeds'), {
         'type': int,
@@ -205,8 +204,10 @@ args.dists = {
     'variations': instantiate_dist(*args.dist_variations),
     'acceptance': instantiate_dist(*args.dist_acceptance)
 }
-if any(not 0 < p < 1 for p in args.phases):
-    raise ValueError("--phases takes a list of level time fractions in (0, 1)")
+if args.phases is not None:
+    if any(not 0 < p < 1 for p in args.phases):
+        raise ValueError("--phases takes a list of time fractions in (0, 1)")
+    args.phases = array(args.phases + [1.], dtype='f4')
 if not 1 <= len(args.random_seeds) <= 2:
     # WA: https://bugs.python.org/issue11354.
     raise ValueError("--random_seeds can only take one or two arguments")
@@ -223,7 +224,6 @@ for key, new_key in args.param_map:
 args.param_map = param_map
 args.param_freeze = tuple(args.param_freeze)
 args.param_scale = {k: float(s) for k, v in args.param_scale}
-args.phases = array(args.phases + [1.], dtype='f4')
 
 for iteration in range(args.iterations):
     params, info = do_train(**vars(args))

@@ -1,8 +1,8 @@
 from copy import deepcopy
-from libc.math cimport sqrt
+from libc.math cimport ceil, sqrt
 
 from cython import wraparound
-from numpy import array, empty, newaxis, prod, repeat
+from numpy import asarray, empty, newaxis, ones, prod, repeat
 from numpy.random import randint
 
 from interface cimport c_get_score
@@ -36,10 +36,10 @@ cdef class BaseBot:
     the values from all parameter sets. If parameters without the additional
     axis are loaded, the array is repeated with the same value for each set.
     """
+    @wraparound(True)
     def __init__(self, dict level, dict params={}, dict param_map={},
                  tuple param_freeze=(), dict param_scale={},
-                 dict dists=None, tuple emphases=None,
-                 float[:] phases=array([1.], dtype='f4')):
+                 dict dists=None, tuple emphases=None, float[:] phases=None):
         """
         Prepares the bot for the given level, fixing some parameters.
 
@@ -59,31 +59,30 @@ cdef class BaseBot:
         just a subset of needed parameter arrays, the rest will be randomized
         (as if parameters were newly generated).
 
-        Phases may be a list of phase ends as level time fractions.
-        If it contains anything more than a single entry (1.), the choices
-        array is initialized. For instance with phases (.25, .5, .75, 1.) it
-        be set to [0, 0, ..., 0, 1, 1, ..., 1, 2, 2, ..., 2, 3, 3, ..., 3].
+        Phases may be a list of phase ends as level time fractions; overrides
+        phases info stored with params.
+        If phases, as given or as found under '_phases' key in the params dict,
+        contains anything more than a single entry (1.), the choices array is
+        initialized. For instance, for phases (.25, .5, .75, 1.) it is set to
+        [0, 0, ..., 0, 1, 1, ..., 1, 2, 2, ..., 2, 3, 3, ..., 3].
         """
         cdef:
-            dict param_shapes = self.param_shapes
             int steps = level['steps'], \
-                phase, step
+                phase, step, ndim, choices, reps
             float phase_end, scale
+            dict param_shapes = self.param_shapes
             str key, target_key
             tuple shape
             object param
 
         self.level = level
 
-        if len(phases) == 1 and '_phases' in params:
-            # TODO: What do we do if params have conflicting phases?
-            #       Repeat or clip?
-            phases = params['_phases']
+        if phases is None:
+            phases = params.get('_phases', ones(1, dtype='f4'))
+        self.param_choices = len(phases)
         if len(phases) == 1:
-            self.param_choices = 1
             self.choices = None
         else:
-            self.param_choices = len(phases)
             self.choices = empty(steps, dtype='i4')
             step = 0
             for phase, phase_end in enumerate(phases):
@@ -104,19 +103,41 @@ cdef class BaseBot:
         for key, param in params.items():
             target_keys = param_map.get(key, []) + [key]
             for target_key in target_keys:
-                if target_key in param_shapes:
-                    if self.param_choices != 1:
-                        if param.ndim == len(param_shapes[target_key]) - 1:
-                            param = repeat(param[..., newaxis],
-                                           self.param_choices, axis=-1)
-                        elif False:
-                            pass  # TODO Warn or extend, allow downgrading?
+                try:
+                    shape = param_shapes[target_key]
+                except KeyError:
+                    pass
+                else:
+                    ndim = len(shape) - (0 if self.choices is None else 1)
+                    if param.ndim == ndim:
+                        # Param has a single choice for each entry.
+                        choices = 1
+                    elif param.ndim == ndim + 1:
+                        # Multiple choices are kept as the inner-most axis.
+                        choices = param.shape[-1]
+                    else:
+                        raise ValueError("Wrong parameter shape")
+                    if self.param_choices < choices:
+                        # For example 5-set used with 3 phases or congruences.
+                        if self.param_choices == 1:
+                            param = param[..., 0]
+                        else:
+                            param = param[..., :self.param_choices]
+                    elif self.param_choices > choices:
+                        # Single-set used for a multi-bot, or a multi-set used
+                        # with more phases or congruences than it has choices.
+                        if param.ndim < len(shape):
+                            param = param[..., newaxis]
+                        reps = <int>ceil(<float>self.param_choices / choices)
+                        param = repeat(param, reps, axis=-1)
+                        param = param[..., :self.param_choices]
                     self.params[target_key] = deepcopy(param)
-        if self.param_choices != 1:
-            self.params['_phases'] = array(phases)
 
         for key, scale in param_scale.items():
             self.params[key] *= scale
+
+        if len(phases) > 1:
+            self.params['_phases'] = asarray(phases)
 
         for key in param_freeze:
             self.param_entries -= self.param_sizes[key]
