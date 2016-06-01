@@ -23,7 +23,6 @@ may be necessary to clean Cython's build files between their invocations):
 from os.path import getsize
 from tarfile import open as taropen
 
-from init import initialize; initialize()
 from core import available_bots
 from iop import parse_args, resolve_params
 

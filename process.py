@@ -9,7 +9,6 @@ Multiple inputs can be listed and processed together:
 
     ./process.py stats srs_0 srs_1 srs_2
 """
-from init import initialize; initialize()
 from core import available_processors, do_process
 from iop import date_desc, parse_args, results_desc, time_desc
 

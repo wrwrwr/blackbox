@@ -11,7 +11,6 @@ bot or level can be selected using --bot (name and params key) and --level.
 Collectors vary greatly in what they do. They usually have a matching processor
 or trainer that can make use of the collected data.
 """
-from init import initialize; initialize()
 from core import available_bots, available_collectors, do_collect
 from iop import date_desc, level_desc, parse_args, time_desc
 

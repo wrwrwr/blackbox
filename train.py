@@ -58,7 +58,6 @@ And to now reuse your linear coefficients for the diffs_1 bot:
 """
 from numpy import array
 
-from init import initialize; initialize(cython_unsafe=True)
 from core import available_bots, available_trainers, do_train
 from iop import (instantiate_dist, params_desc, parse_args, scores_desc,
                  training_desc)

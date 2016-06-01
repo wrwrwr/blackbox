@@ -4,19 +4,16 @@ Proxies between command-line utilities and statically compiled implementations.
 from collections import OrderedDict as odict
 from datetime import datetime
 from heapq import heappop, heappush
-from libc.time cimport time
-from libc.stdlib cimport rand, srand
 from time import clock
 
-from numpy.random import randint, seed as nseed
-
 from interface import finish
-from interface cimport c_do_action
 
+from init import initialize; initialize(cython_unsafe=True)
 from bots import available_bots
 from collectors import available_collectors
 from iop import (first_free, load_data, load_level, load_params,
                  save_data, save_params)
+from prngs import seed_prngs
 from processors import available_processors
 from trainers import available_trainers
 
@@ -134,7 +131,7 @@ def do_collect(collector, level, bot, prngs_seed, output, verbosity, **kwargs):
     level = load_level(level, verbosity)
     Bot = available_bots[bot[0]]
     if bot[1] is not None:
-        params_key, params = load_params(*bot, verbosity)[:2]
+        params_key, params = load_params(*bot, verbosity=verbosity)[:2]
     else:
         params_key, params = None, {}
     bot_ = Bot(level, params)
@@ -174,21 +171,3 @@ def do_process(processor, input_, prngs_seed, verbosity, **kwargs):
         'prngs_seed': prngs_seed
     }
     return results, meta
-
-
-def seed_prngs(seed=None):
-    """
-    Initializes NumPy's RandomState and C's stdlib random generators, and
-    returns the seed (a urandom or clock-based one if none is given).
-
-    In critical sections you can find some pretty biased usage of rand().
-    It had better not been used at all, but is quite a bit faster than other
-    options and likely sufficient is the cases it is used.
-    """
-    if seed is None:
-        # We want to store the actual seed, so need to explicitly generate it.
-        nseed()
-        seed = randint(2 ** 32)
-    nseed(seed)
-    srand(randint(2 ** 32))
-    return seed

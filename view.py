@@ -18,7 +18,6 @@ from collections import OrderedDict as odict
 from datetime import datetime
 from textwrap import indent
 
-from init import initialize; initialize()
 from core import available_bots
 from iop import load_params, params_desc, parse_args, seeds_desc, training_desc
 
