@@ -62,27 +62,29 @@ arguments = (
         'help': "continue with following param sets if one fails"
     })
 )
-args = parse_args(description, arguments)
 
-for params in args.params_sets:
-    try:
-        info = do_play(params=params, **vars(args))
-    except:
-        if not args.ignore_exceptions:
-            raise
+if __name__ == '__main__':
+    args = parse_args(description, arguments)
+
+    for params in args.params_sets:
+        try:
+            info = do_play(params=params, **vars(args))
+        except:
+            if not args.ignore_exceptions:
+                raise
+            else:
+                continue
+
+        info['scores'] = scores_desc(info['scores'], args.verbosity,
+                                     args.precision)
+        if args.verbosity == 0:
+            print("{bot} {params_key} {scores}".format(**info))
         else:
-            continue
-
-    info['scores'] = scores_desc(info['scores'], args.verbosity,
-                                 args.precision)
-    if args.verbosity == 0:
-        print("{bot} {params_key} {scores}".format(**info))
-    else:
-        info['date'] = date_desc(info['date'])
-        info['time'] = time_desc(info['time'], args.precision)
-        print(("\nDate: {date}\n" +
-               "Bot: {bot}, params: {params_key}, runs: {runs}\n" +
-               "Scores: {scores}\n" +
-               "Time: {time}, PRNGs: {prngs_seed}").format(**info))
-if args.verbosity != 0:
-    print()
+            info['date'] = date_desc(info['date'])
+            info['time'] = time_desc(info['time'], args.precision)
+            print(("\nDate: {date}\n" +
+                   "Bot: {bot}, params: {params_key}, runs: {runs}\n" +
+                   "Scores: {scores}\n" +
+                   "Time: {time}, PRNGs: {prngs_seed}").format(**info))
+    if args.verbosity != 0:
+        print()

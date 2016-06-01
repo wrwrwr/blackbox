@@ -202,44 +202,48 @@ arguments = (
         'help': "how many decimal digits of floats to print"
     })
 )
-args = parse_args(description, arguments)
-args.config = tuple(args.config)
-args.dists = {
-    'real': instantiate_dist(*args.dist_real),
-    'unit': instantiate_dist(*args.dist_unit),
-    'new': {d[0]: instantiate_dist(*d[1:]) for d in args.dist_param_new},
-    'vary': {d[0]: instantiate_dist(*d[1:]) for d in args.dist_param_vary},
-    'variations': instantiate_dist(*args.dist_variations),
-    'acceptance': instantiate_dist(*args.dist_acceptance)
-}
-if args.phases is not None:
-    if any(not 0 < p < 1 for p in args.phases):
-        raise ValueError("--phases takes a list of time fractions in (0, 1)")
-    args.phases = array(args.phases + [1.], dtype='f4')
-if not 1 <= len(args.random_seeds) <= 2:
-    # WA: https://bugs.python.org/issue11354.
-    raise ValueError("--random_seeds can only take one or two arguments")
-if not args.stored_seeds and args.random_seeds[0] == 0:
-    args.random_seeds = [1, 1]
-args.random_seeds_pool = args.random_seeds.pop(0)
-args.random_seeds = args.random_seeds[0] if args.random_seeds else 1
-if args.random_seeds_pool < args.random_seeds:
-    raise ValueError("Cannot choose {random_seeds} seeds from a pool of " +
-                     "just {random_seeds_pool}".format(**args))
-param_map = {}
-for key, new_key in args.param_map:
-    param_map.setdefault(key, []).append(new_key)
-args.param_map = param_map
-args.param_freeze = tuple(args.param_freeze)
-args.param_scale = {k: float(s) for k, v in args.param_scale}
 
-for iteration in range(args.iterations):
-    params, info = do_train(**vars(args))
+if __name__ == '__main__':
+    args = parse_args(description, arguments)
+    args.config = tuple(args.config)
+    args.dists = {
+        'real': instantiate_dist(*args.dist_real),
+        'unit': instantiate_dist(*args.dist_unit),
+        'new': {d[0]: instantiate_dist(*d[1:]) for d in args.dist_param_new},
+        'vary': {d[0]: instantiate_dist(*d[1:]) for d in args.dist_param_vary},
+        'variations': instantiate_dist(*args.dist_variations),
+        'acceptance': instantiate_dist(*args.dist_acceptance)
+    }
+    if args.phases is not None:
+        if any(not 0 < p < 1 for p in args.phases):
+            raise ValueError("--phases takes a list of phase ends, each " + 
+                             "should be a level time fraction in (0, 1)")
+        args.phases = array(args.phases + [1.], dtype='f4')
+    if not 1 <= len(args.random_seeds) <= 2:
+        # WA: https://bugs.python.org/issue11354.
+        raise ValueError("--random_seeds can only take one or two arguments")
+    if not args.stored_seeds and args.random_seeds[0] == 0:
+        args.random_seeds = [1, 1]
+    args.random_seeds_pool = args.random_seeds.pop(0)
+    args.random_seeds = args.random_seeds[0] if args.random_seeds else 1
+    if args.random_seeds_pool < args.random_seeds:
+        raise ValueError("Cannot choose {random_seeds} seeds from a pool of " +
+                         "just {random_seeds_pool}".format(**args))
+    param_map = {}
+    for key, new_key in args.param_map:
+        param_map.setdefault(key, []).append(new_key)
+    args.param_map = param_map
+    args.param_freeze = tuple(args.param_freeze)
+    args.param_scale = {k: float(s) for k, v in args.param_scale}
 
-    if args.verbosity == 0:
-        scores = scores_desc(info['scores'], args.verbosity, args.precision)
-        out = "{} {} {}".format(info['bot'], info['output'], scores)
-    else:
-        info_desc = training_desc(info, args.verbosity, args.precision)
-        out = "{}\n{}".format("\n".join(info_desc), params_desc(params, 8))
-    print(out, flush=True)
+    for iteration in range(args.iterations):
+        params, info = do_train(**vars(args))
+
+        if args.verbosity == 0:
+            scores = scores_desc(info['scores'], args.verbosity,
+                                 args.precision)
+            out = "{} {} {}".format(info['bot'], info['output'], scores)
+        else:
+            info_desc = training_desc(info, args.verbosity, args.precision)
+            out = "{}\n{}".format("\n".join(info_desc), params_desc(params, 8))
+        print(out, flush=True)

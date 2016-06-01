@@ -39,20 +39,23 @@ arguments = (
         'default': None,
         'help': "how many decimal digits of floats to print"
     })
+
 )
-args = parse_args(description, arguments)
 
-results, info = do_process(**vars(args))
+if __name__ == '__main__':
+    args = parse_args(description, arguments)
 
-results = results_desc(results, args.verbosity, args.precision)
-if args.verbosity == 0:
-    print(results.strip())
-else:
-    info['date'] = date_desc(info['date'])
-    info['input'] = " ".join(info['input'])
-    info['time'] = time_desc(info['time'], args.precision)
-    info['results'] = results
-    print(("\nDate: {date}\n" +
-           "Processor: {processor}\n" +
-           "Input: {input}, Time: {time}\n" +
-           "PRNGs: {prngs_seed}\n{results}").format(**info))
+    results, info = do_process(**vars(args))
+
+    results = results_desc(results, args.verbosity, args.precision)
+    if args.verbosity == 0:
+        print(results.strip())
+    else:
+        info['date'] = date_desc(info['date'])
+        info['input'] = " ".join(info['input'])
+        info['time'] = time_desc(info['time'], args.precision)
+        info['results'] = results
+        print(("\nDate: {date}\n" +
+               "Processor: {processor}\n" +
+               "Input: {input}, Time: {time}\n" +
+               "PRNGs: {prngs_seed}\n{results}").format(**info))
