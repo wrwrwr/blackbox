@@ -24,7 +24,7 @@ from os.path import getsize
 from tarfile import open as taropen
 
 from core import available_bots
-from iop import parse_args, resolve_params
+from iop import parse_args, resolve_path
 
 description = "Pack a bot with some params for submission."
 arguments = (
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     args = parse_args(description, arguments)
 
     for params in args.params_sets:
-        params_key, params_filename = resolve_params(args.bot, params)
+        params_key, params_filename = resolve_path(args.bot, params)
         pack = 'packs/{}.tar.gz'.format(params_key)
         with taropen(pack, 'w:gz') as archive:
             archive.add('packs/template/bot.py', 'bot.py')

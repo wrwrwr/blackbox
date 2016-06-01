@@ -4,7 +4,7 @@ Input, output and printing.
 from argparse import ArgumentParser, HelpFormatter
 from contextlib import contextmanager
 from os import fstat
-from os.path import exists
+from os.path import dirname, exists, join
 from textwrap import indent
 
 from numpy import (array, asscalar, get_printoptions, load, savez_compressed,
@@ -120,9 +120,7 @@ def load_level(level, verbosity):
     """
     Loads the named level and returns its name and description.
     """
-    path = level
-    if not path.startswith('levels/'):
-        path = 'levels/{}'.format(path)
+    path = join(dirname(__file__), 'levels', level)
     if not path.endswith('_level.data'):
         path = '{}_level.data'.format(path)
     if verbosity > 3:
@@ -134,6 +132,24 @@ def load_level(level, verbosity):
             'steps': get_max_time()}
 
 
+def resolve_path(agent, key, folder):
+    """
+    Finds a file identified by the given key (in the context of the agent).
+
+    If the key is composed of only digits, adds the agent (collector or bot)
+    as a prefix. Otherwise uses the whole key, if "last" is given as the key,
+    finds the file with the highest numeric key.
+    """
+    if key == 'last':
+        key = first_free(join(folder, agent)) - 1
+    if isinstance(key, int) or key.isdigit():
+        key = '{}_{}'.format(agent, key)
+    path = join(dirname(__file__), folder, key)
+    if not path.endswith('.npz'):
+        path = '{}.npz'.format(path)
+    return key, path
+
+
 def save_params(bot, key, params, history, verbosity):
     """
     Saves bot parameters and its history.
@@ -142,37 +158,17 @@ def save_params(bot, key, params, history, verbosity):
     key and an additional reserved one for history.
     """
     params['__history'] = history
-    path = 'params/{}_{}.npz'.format(bot, key)
+    path = resolve_path(bot, key, 'params')[1]
     if verbosity > 3:
         print("Saving params to: {}".format(path))
     savez_compressed(path, **params)
-
-
-def resolve_params(bot, key):
-    """
-    Finds params file identified by the given key (in the context of the bot).
-
-    If the key is composed of only digits, adds the bot as a prefix. Otherwise
-    uses the whole key, to allow using params from another bot. Moreover, if
-    "last" is given as the key, finds the params with the highest numeric key.
-    """
-    if key == 'last':
-        key = first_free('params/{}'.format(bot)) - 1
-    if isinstance(key, int) or key.isdigit():
-        key = '{}_{}'.format(bot, key)
-    path = key
-    if not path.startswith('params/'):
-        path = 'params/{}'.format(path)
-    if not path.endswith('.npz'):
-        path = '{}.npz'.format(path)
-    return key, path
 
 
 def load_params(bot, key, verbosity):
     """
     Loads a set of bot parameters identified by the given key.
     """
-    key, path = resolve_params(bot, key)
+    key, path = resolve_path(bot, key, 'params')
     if verbosity > 3:
         print("Loading params from: {}".format(path))
     with load(path) as data:
@@ -202,21 +198,17 @@ def save_data(collector, key, data, meta, verbosity):
     Saves collected data to data/<collector>_<key>.npz.
     """
     data['__meta'] = meta
-    path = 'data/{}_{}.npz'.format(collector, key)
+    path = resolve_path(collector, key, 'data')[1]
     if verbosity > 3:
         print("Saving data to: {}".format(path))
     savez_compressed(path, **data)
 
 
-def load_data(key, verbosity):
+def load_data(collector, key, verbosity):
     """
-    Loads collected data from data/<key>.npz.
+    Loads collected data from data/<collector>_<key>.npz.
     """
-    path = key
-    if not path.startswith('data/'):
-        path = 'data/{}'.format(path)
-    if not path.endswith('.npz'):
-        path = '{}.npz'.format(path)
+    path = resolve_path(collector, key, 'data')[1]
     if verbosity > 3:
         print("Loading data from: {}".format(path))
     with load(path) as data:

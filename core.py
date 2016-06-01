@@ -164,7 +164,7 @@ def do_process(processor, input_, prngs_seed, verbosity, **kwargs):
     prngs_seed = seed_prngs(prngs_seed)
 
     start = clock()
-    data = tuple(load_data(key, verbosity) for key in input_)
+    data = tuple(load_data(*key, verbosity=verbosity) for key in input_)
     processor_ = available_processors[processor](data)
     results = processor_.process()
     end = clock()

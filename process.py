@@ -3,11 +3,11 @@
 """
 A command-line tool for data munging. Select a processor and feed it with data:
 
-    ./process.py stats srs_0
+    ./process.py stats srs 0
 
 Multiple inputs can be listed and processed together:
 
-    ./process.py stats srs_0 srs_1 srs_2
+    ./process.py stats srs 0 srs 1 srs 2
 """
 from core import available_processors, do_process
 from iop import date_desc, parse_args, results_desc, time_desc
@@ -19,9 +19,10 @@ arguments = (
         'help': "processor to use"
     }),
     (('input_',), {
-        'nargs': '+',
+        'nargs': 2,
+        'action': 'append',
         'metavar': 'input',
-        'help': "data to process (data/<data>.npz), for example srs_0"
+        'help': "data to process, for example srs 0 srs 1 srs 3"
     }),
     (('-s', '--prngs_seed'), {
         'type': int,
@@ -38,7 +39,6 @@ arguments = (
         'default': None,
         'help': "how many decimal digits of floats to print"
     })
-
 )
 
 if __name__ == '__main__':
@@ -51,7 +51,7 @@ if __name__ == '__main__':
         print(results.strip())
     else:
         info['date'] = date_desc(info['date'])
-        info['input'] = " ".join(info['input'])
+        info['input'] = " ".join("{}_{}".format(*i) for i in info['input'])
         info['time'] = time_desc(info['time'], args.precision)
         info['results'] = results
         print(("\nDate: {date}\n" +
