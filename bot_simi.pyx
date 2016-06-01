@@ -36,7 +36,7 @@ cdef class Bot(BaseBot):
         return bot
 
     cdef dict new_params(self, dict dists, tuple emphases):
-        return {'lookback': 1000, 'threshold': 0}
+        return {'lookback': 100, 'threshold': 0}
 
     cdef void vary_param(self, dict dists, tuple emphases, float change):
         raise NotImplementedError()

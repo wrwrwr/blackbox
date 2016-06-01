@@ -5,6 +5,7 @@ Assumes 4 actions.
 """
 from libc.stdlib cimport rand, RAND_MAX
 
+from numpy cimport ndarray
 from numpy.random import randint
 
 from interface cimport c_do_action
@@ -18,11 +19,11 @@ cdef class Bot(BaseBot):
 
     cdef dict new_params(self, dict dists, tuple emphases):
         cdef:
-            float[:] probs
+            ndarray[float, ndim=1] probs
 
-        probs = dists['unit'].rvs(size=self.level['actions'] - 1)
+        probs = dists['unit'].rvs(size=self.param_shapes['probs']).astype('f4')
         probs.sort()
-        return {'probs': probs.astype('f4')}
+        return {'probs': probs}
 
     cdef void vary_param(self, dict dists, tuple emphases, float change):
         cdef:

@@ -12,7 +12,7 @@ cdef class Bot(BaseBot):
         self.param_shapes = {
             'constant': (level['actions'],),
             'state0l': (level['actions'], level['features']),
-            'state0q': (level['actions'], level['features'] ** 2)
+            'state0q': (level['actions'], level['features'], level['features'])
         }
 
     cdef void act(self, int steps):
