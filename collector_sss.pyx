@@ -1,5 +1,6 @@
 """
-Collects (state, following states) tuples, trying each action in turn.
+Collects (state, following states) tuples, trying each action at every step of
+the level run.
 """
 from numpy import empty
 

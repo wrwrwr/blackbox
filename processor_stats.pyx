@@ -1,5 +1,7 @@
 """
-Calculates various global statistics.
+Calculates various global statistics on state and rewards.
+
+Requires data from the srs collector.
 """
 from numpy import zeros, diff, fabs, sqrt, where
 
@@ -23,8 +25,8 @@ cdef class Processor(BaseProcessor):
             steps += meta['level']['steps']
 
         return self.results((
-                ('average rewards', rewards / steps),
-                ('average state', totals / steps),
-                ('state standard deviation', sqrt(variances / steps)),
-                ('change frequencies', changes / steps),
-                ('change > 1 frequencies', large_changes / steps)))
+                ("average rewards", rewards / steps),
+                ("state component means", totals / steps),
+                ("state standard deviationss", sqrt(variances / steps)),
+                ("change frequencies", changes / steps),
+                ("change > 1 frequencies", large_changes / steps)))

@@ -25,8 +25,8 @@ cdef class BaseProcessor:
         bots = ("{} {}".format(*meta['bot']) for _, meta in self.data)
         levels = (meta['level']['key'] for _, meta in self.data)
         info = odict((
-            ('bots', ", ".join(bots)),
-            ('levels', ", ".join(levels))))
+            ("bots", ", ".join(bots)),
+            ("levels", ", ".join(levels))))
         info.update(entries)
         return info
 

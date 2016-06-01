@@ -1,5 +1,7 @@
 """
-How do state components relate to each other?
+Prints correlations between state components.
+
+Can consume any data that contains consequent states (srs, ssa, sss).
 """
 from numpy import corrcoef, nonzero, transpose, triu, zeros
 
@@ -24,5 +26,5 @@ cdef class Processor(BaseProcessor):
         corrs_small = transpose(corrs_small)
 
         return self.results((
-                ('state component pairs with large correlation', corrs_large),
-                ('state component pairs with small correlation', corrs_small)))
+                ("state component pairs with large correlation", corrs_large),
+                ("state component pairs with small correlation", corrs_small)))

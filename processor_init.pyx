@@ -1,5 +1,7 @@
 """
 Shows information about the first few states.
+
+Needs data from the sss collector.
 """
 from numpy import empty, var
 
@@ -29,11 +31,11 @@ cdef class Processor(BaseProcessor):
             variances4[index] = var(fstates4[index], axis=0)
 
         return self.results((
-                ('initial states', states0),
-                # ('states after the first action', fstates1),
-                ('changes after the first action', changes1),
-                ('the first action matters', variances1.any()),
-                ('state after three actions', states3),
-                # ('following (fourth) states', fstates4),
-                ('changes after the fourth action', changes4),
-                ('the fourth action matters', variances4.any())))
+                ("initial states", states0),
+                # ("states after the first action", fstates1),
+                ("changes after the first action", changes1),
+                ("the first action matters", variances1.any()),
+                ("state after three actions", states3),
+                # ("following (fourth) states", fstates4),
+                ("changes after the fourth action", changes4),
+                ("the fourth action matters", variances4.any())))

@@ -1,7 +1,8 @@
 """
-Calculates rewards per action, phase and step congruency class.
+Calculates rewards per action, phase and step congruency class. Can give a
+first glance at possible temporal patterns.
 
-For a first glance at some possible temporal patterns.
+Processes data from the ssa processor.
 """
 from numpy import diff, zeros
 
@@ -36,11 +37,11 @@ cdef class Processor(BaseProcessor):
                 mod9_rewards[step % 9] += reward
 
         return self.results((
-                ('counts of actions taken', action_counts),
-                ('average reward per action', action_rewards / action_counts),
-                ('gains by 5 level phases', phase5_rewards / len(self.data)),
-                ('gains by 8 level phases', phase8_rewards / len(self.data)),
-                ('gains by 9 level phases', phase9_rewards / len(self.data)),
-                ('gains by step mod 5', mod5_rewards / len(self.data)),
-                ('gains by step mod 8', mod8_rewards / len(self.data)),
-                ('gains by step mod 9', mod9_rewards / len(self.data))))
+                ("counts of actions taken", action_counts),
+                ("average reward per action", action_rewards / action_counts),
+                ("gains by 5 level phases", phase5_rewards / len(self.data)),
+                ("gains by 8 level phases", phase8_rewards / len(self.data)),
+                ("gains by 9 level phases", phase9_rewards / len(self.data)),
+                ("gains by step mod 5", mod5_rewards / len(self.data)),
+                ("gains by step mod 8", mod8_rewards / len(self.data)),
+                ("gains by step mod 9", mod9_rewards / len(self.data))))

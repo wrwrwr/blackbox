@@ -1,5 +1,6 @@
 """
-Collects (state, rewards) tuples, trying each action for a given state.
+Collects (state, immediate rewards) tuples, trying each action at every step
+of the level playthrough.
 """
 from numpy import empty
 
