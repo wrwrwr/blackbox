@@ -1,6 +1,9 @@
 """
-Records a level playthrough, a sequence of (state, action and score) tuples.
-(It shouldn't be too risky to assume that the initial score is always zero.)
+Records a level playthrough, sequences of states, scores and actions.
+
+The n-th record in states and scores holds the values before the n-th action.
+The final state and score are also stored (hence actions array is one item
+shorter than the arrays for states and scores).
 """
 from numpy import empty
 
@@ -18,16 +21,21 @@ cdef class Collector(BaseCollector):
             float[:] scores
             float* state
 
-        states = empty((steps, features), dtype='f4')
+        states = empty((steps + 1, features), dtype='f4')
+        scores = empty(steps + 1, dtype='f4')
         actions = empty(steps, dtype='i4')
-        scores = empty(steps, dtype='f4')
 
         for step in range(steps):
             state = c_get_state()
             for feature in range(features):
                 states[step, feature] = state[feature]
+            scores[step] = c_get_score()
             self.bot.act(1)
             actions[step] = self.bot.last_action
-            scores[step] = c_get_score()
 
-        return {'states': states, 'actions': actions, 'scores': scores}
+        state = c_get_state()
+        for feature in range(features):
+            states[steps, feature] = state[feature]
+        scores[steps] = c_get_score()
+
+        return {'states': states, 'scores': scores, 'actions': actions}

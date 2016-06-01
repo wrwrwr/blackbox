@@ -3,7 +3,7 @@ Calculates rewards per action, phase and step congruency class.
 
 For a first glance at some possible temporal patterns.
 """
-from numpy import diff, insert, zeros
+from numpy import diff, zeros
 
 
 cdef class Processor(BaseProcessor):
@@ -24,7 +24,6 @@ cdef class Processor(BaseProcessor):
             bots.append(meta['bot'])
             levels.append(meta['level']['key'])
             rewards = diff(record['scores'])
-            rewards = insert(rewards, 0, record['scores'][0])
             for step, action in enumerate(record['actions']):
                 reward = rewards[step]
                 action_counts[action] += 1
