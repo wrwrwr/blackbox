@@ -3,6 +3,7 @@ Input, output and printing.
 """
 from argparse import ArgumentParser, HelpFormatter
 from contextlib import contextmanager
+from os import fstat
 from os.path import exists
 from textwrap import indent
 
@@ -23,6 +24,20 @@ def printoptions(*args, **kwargs):
     set_printoptions(*args, **kwargs)
     yield 
     set_printoptions(**old_printoptions)
+
+
+def common_printoptions():
+    """
+    Configures array printing for console and file output.
+
+    Array coefficients can be pretty big, we do want to print them in whole
+    however.
+    If we are printing to a file it's better not to wrap lines to be able to
+    scroll less and copy with ease. But when printing to the console, which
+    likely is set up to wrap lines, it's better to let NumPy do the wrapping.
+    """
+    linewidth = 75 if fstat(0) == fstat(1) else 1e6
+    set_printoptions(linewidth=linewidth, threshold=1e6)
 
 
 class NoMetavarsHelpFormatter(HelpFormatter):

@@ -8,11 +8,11 @@ from time import clock
 
 from interface import finish
 
-from init import initialize; initialize(cython_unsafe=True)
+from cython_init import cython_on_demand  # Executed on module import.
 from bots import available_bots
 from collectors import available_collectors
-from iop import (first_free, load_data, load_level, load_params,
-                 save_data, save_params)
+from iop import (common_printoptions, first_free, load_data, load_level,
+                 load_params, save_data, save_params)
 from prngs import seed_prngs
 from processors import available_processors
 from trainers import available_trainers
@@ -22,8 +22,10 @@ def do_play(bot, params, levels, runs, prngs_seed, verbosity, **kwargs):
     """
     Evaluates the bot with params on some levels.
     """
-    start = clock()
+    common_printoptions()
     prngs_seed = seed_prngs(prngs_seed)
+
+    start = clock()
     Bot = available_bots[bot]
     params_key, params = load_params(bot, params, verbosity)[:2]
     scores = odict()
@@ -54,9 +56,10 @@ def do_train(bot, trainer, config, dists, emphases, phases,
     """
     if output is None:
         output = first_free('params/{}'.format(bot))
+    common_printoptions()
+    prngs_seed = seed_prngs(prngs_seed)
 
     start = clock()
-    prngs_seed = seed_prngs(prngs_seed)
     Bot = available_bots[bot]
     Trainer = available_trainers[trainer]
 
@@ -125,9 +128,10 @@ def do_collect(collector, level, bot, prngs_seed, output, verbosity, **kwargs):
     """
     if output is None:
         output = first_free('data/{}'.format(collector))
+    common_printoptions()
+    prngs_seed = seed_prngs(prngs_seed)
 
     start = clock()
-    prngs_seed = seed_prngs(prngs_seed)
     level = load_level(level, verbosity)
     Bot = available_bots[bot[0]]
     if bot[1] is not None:
@@ -156,8 +160,10 @@ def do_process(processor, input_, prngs_seed, verbosity, **kwargs):
     """
     Analyses data collected by a collector.
     """
-    start = clock()
+    common_printoptions()
     prngs_seed = seed_prngs(prngs_seed)
+
+    start = clock()
     data = tuple(load_data(key, verbosity) for key in input_)
     processor_ = available_processors[processor](data)
     results = processor_.process()
