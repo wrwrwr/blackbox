@@ -11,7 +11,7 @@ bot or level can be selected using --bot (name and params key) and --level.
 Collectors vary greatly in what they do. They usually have a matching processor
 or trainer that can make use of the collected data.
 """
-from core import available_bots, available_collectors, do_collect
+from core import available_collectors, do_collect
 from iop import date_desc, level_desc, parse_args, time_desc
 
 description = "Collect data from a level."
@@ -43,7 +43,7 @@ arguments = (
         'default': None,
         'help': "file suffix in data/<collector>_<output>.npz"
     }),
-    (( '-v', '--verbosity'), {
+    (('-v', '--verbosity'), {
         'type': int,
         'default': 1,
         'help': "0 = condensed, 1 = expanded, 4+ = debugging info"

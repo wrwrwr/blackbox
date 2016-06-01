@@ -11,7 +11,7 @@ from numpy import (array, asscalar, get_printoptions, load, savez_compressed,
                    set_printoptions)
 from scipy import stats
 
-from interface import (get_num_of_features, get_num_of_actions, get_max_time,
+from interface import (get_max_time, get_num_of_actions, get_num_of_features,
                        load_level as bb_load_level)
 
 
@@ -22,7 +22,7 @@ def printoptions(*args, **kwargs):
     """
     old_printoptions = get_printoptions()
     set_printoptions(*args, **kwargs)
-    yield 
+    yield
     set_printoptions(**old_printoptions)
 
 

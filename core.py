@@ -6,9 +6,7 @@ from datetime import datetime
 from heapq import heappop, heappush
 from time import clock
 
-from interface import finish
-
-from cython_init import cython_on_demand  # Executed on module import.
+import cython_init  # Executes pyximport install on module import # noqa.
 from bots import available_bots
 from collectors import available_collectors
 from iop import (common_printoptions, first_free, load_data, load_level,
@@ -16,6 +14,8 @@ from iop import (common_printoptions, first_free, load_data, load_level,
 from prngs import seed_prngs
 from processors import available_processors
 from trainers import available_trainers
+
+from interface import finish
 
 
 def do_play(bot, params, levels, runs, prngs_seed, verbosity, **kwargs):
@@ -26,12 +26,12 @@ def do_play(bot, params, levels, runs, prngs_seed, verbosity, **kwargs):
     prngs_seed = seed_prngs(prngs_seed)
 
     start = clock()
-    Bot = available_bots[bot]
+    bot_class = available_bots[bot]
     params_key, params = load_params(bot, params, verbosity)[:2]
     scores = odict()
     for level in levels:
         level = load_level(level, verbosity)
-        scores[level['key']] = Bot(level, params).evaluate(runs)
+        scores[level['key']] = bot_class(level, params).evaluate(runs)
         finish(verbose=verbosity > 3)
     end = clock()
 
@@ -60,8 +60,8 @@ def do_train(bot, trainer, config, dists, emphases, phases,
     prngs_seed = seed_prngs(prngs_seed)
 
     start = clock()
-    Bot = available_bots[bot]
-    Trainer = available_trainers[trainer]
+    bot_class = available_bots[bot]
+    trainer_class = available_trainers[trainer]
 
     # Load the level we'll be training on.
     level = load_level(level, verbosity)
@@ -76,25 +76,25 @@ def do_train(bot, trainer, config, dists, emphases, phases,
     seeds = []
     for index, seed in enumerate(stored_seeds):
         params_key, params, history = load_params(bot, seed, verbosity)
-        bot_ = Bot(level, params, param_map, param_freeze, param_scale,
-                   dists, emphases, phases)
+        bot_ = bot_class(level, params, param_map, param_freeze, param_scale,
+                         dists, emphases, phases)
         heappush(seeds, (float('inf'), index, bot_, history))
     for index in range(random_seeds_pool):
-        bot_ = Bot(level, dists=dists, emphases=emphases, phases=phases)
+        bot_ = bot_class(level, dists=dists, emphases=emphases, phases=phases)
         score = bot_.evaluate(runs)
         heappush(seeds, (score, index + len(stored_seeds), bot_, []))
         if len(seeds) > len(stored_seeds) + random_seeds:
             heappop(seeds)
     seeds = tuple((s[2], s[3]) for s in seeds)
 
-    trainer_ = Trainer(level, config, dists, emphases, seeds, runs)
+    trainer_ = trainer_class(level, config, dists, emphases, seeds, runs)
     params, history = trainer_.train()
 
     # Evaluate the params on more than just the training level.
     scores = odict()
     for key in eval_levels:
         level_ = load_level(key, verbosity)
-        scores[key] = Bot(level_, params).evaluate(runs)
+        scores[key] = bot_class(level_, params).evaluate(runs)
     end = clock()
 
     # Save the final parameters with their history.
@@ -133,12 +133,12 @@ def do_collect(collector, level, bot, prngs_seed, output, verbosity, **kwargs):
 
     start = clock()
     level = load_level(level, verbosity)
-    Bot = available_bots[bot[0]]
+    bot_class = available_bots[bot[0]]
     if bot[1] is not None:
         params_key, params = load_params(*bot, verbosity=verbosity)[:2]
     else:
         params_key, params = None, {}
-    bot_ = Bot(level, params)
+    bot_ = bot_class(level, params)
     collector_ = available_collectors[collector](level, bot_)
     data = collector_.collect()
     end = clock()

@@ -90,14 +90,14 @@ if __name__ == '__main__':
                     named_seeds[index] = "{}_{}".format(record['bot'], seed)
                 elif seed.startswith('linear_1'):
                     named_seeds[index] = "linear{}".format(seed[8:])
-            if not 'param_map' in record:
+            if 'param_map' not in record:
                 record['param_map'] = record.get('params_map', {})
             for key, new_keys in record['param_map'].items():
                 if isinstance(new_keys, str):
                     record['param_map'][key] = [new_keys]
-            if not 'param_freeze' in record:
+            if 'param_freeze' not in record:
                 record['param_freeze'] = record.get('params_freeze', ())
-            if not 'param_scale' in record:
+            if 'param_scale' not in record:
                 record['param_scale'] = {}
             if isinstance(record['level'], str):
                 record['level'] = {'key': record['level'], 'features': -1,

@@ -15,7 +15,7 @@ Multiple parameter sets can be evaluated at once with a bit of shell magic:
     ./play linear `ls params/linear_*.npz` --ignore-exceptions
 """
 from core import available_bots, do_play
-from iop import date_desc, level_desc, parse_args, scores_desc, time_desc
+from iop import date_desc, parse_args, scores_desc, time_desc
 
 description = "Evaluate a bot with params on a level."
 arguments = (
@@ -45,7 +45,7 @@ arguments = (
         'default': None,
         'help': "fixed seed for all pseudo-random number generators"
     }),
-    (( '-v', '--verbosity'), {
+    (('-v', '--verbosity'), {
         'type': int,
         'default': 1,
         'help': "0 = condensed, 1 = expanded, 4+ = debugging info"

@@ -37,7 +37,7 @@ arguments = (
         'metavar': 'params',
         'help': "parameters for the bot, one or more key or bot_key"
     }),
-    (( '-v', '--verbosity'), {
+    (('-v', '--verbosity'), {
         'type': int,
         'default': 1,
         'help': "0 = condensed, 1 = expanded, 4+ = debugging info"

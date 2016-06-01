@@ -28,7 +28,7 @@ arguments = (
         'default': None,
         'help': "fixed seed for all pseudo-random number generators"
     }),
-    (( '-v', '--verbosity'), {
+    (('-v', '--verbosity'), {
         'type': int,
         'default': 1,
         'help': "0 = condensed, 1 = expanded, 4+ = debugging info"

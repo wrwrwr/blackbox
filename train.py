@@ -148,7 +148,7 @@ arguments = (
         'nargs': 2,
         'action': 'append',
         'default': [],
-        'help': "reuse param from a stored seed under a different key; "+
+        'help': "reuse param from a stored seed under a different key; " +
                 "\"state0l state1l\" uses state coeffs for last state"
     }),
     (('-pf', '--param_freeze'), {
@@ -190,7 +190,7 @@ arguments = (
         'default': None,
         'help': "file suffix included in params/<bot>_<output>.npz"
     }),
-    (( '-v', '--verbosity'), {
+    (('-v', '--verbosity'), {
         'type': int,
         'default': 1,
         'help': "0 = condensed, 1 = expanded, 4+ = debugging info"
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     }
     if args.phases is not None:
         if any(not 0 < p < 1 for p in args.phases):
-            raise ValueError("--phases takes a list of phase ends, each " + 
+            raise ValueError("--phases takes a list of phase ends, each " +
                              "should be a level time fraction in (0, 1)")
         args.phases = array(args.phases + [1.], dtype='f4')
     if not 1 <= len(args.random_seeds) <= 2:
