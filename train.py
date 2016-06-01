@@ -233,7 +233,7 @@ if __name__ == '__main__':
         param_map.setdefault(key, []).append(new_key)
     args.param_map = param_map
     args.param_freeze = tuple(args.param_freeze)
-    args.param_scale = {k: float(s) for k, v in args.param_scale}
+    args.param_scale = {k: float(s) for k, s in args.param_scale}
 
     for iteration in range(args.iterations):
         params, info = do_train(**vars(args))
