@@ -48,5 +48,5 @@ cdef class Trainer(BaseTrainer):
                 best_score = best_seed_score
                 best_bot = best_seed_bot
                 best_history = history
-               
+
         return best_bot.params, best_history

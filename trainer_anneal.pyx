@@ -10,7 +10,7 @@ with the previous set.
 
 The config should consist of three values: the number of steps (integer),
 an easing factor for the effects of the acceptance distribution (float),
-and a variation scale (float). 
+and a variation scale (float).
 
 The thresholds drawn from the acceptance distribution are multpilied by the
 fraction of the level left raised to the power of the easing factor, thus a

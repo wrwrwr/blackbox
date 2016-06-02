@@ -113,19 +113,19 @@ cdef class Bot(BaseBot):
             c_do_action(action)
             belief0t = (belief_constant0 + belief_belief0l0[0] * belief0 +
                                            belief_belief0l0[1] * belief1 +
-                                           belief_belief0l0[2] * belief2 + 
+                                           belief_belief0l0[2] * belief2 +
                                            belief_belief0l0[3] * belief3)
             belief1t = (belief_constant1 + belief_belief0l1[0] * belief0 +
                                            belief_belief0l1[1] * belief1 +
-                                           belief_belief0l1[2] * belief2 + 
+                                           belief_belief0l1[2] * belief2 +
                                            belief_belief0l1[3] * belief3)
             belief2t = (belief_constant2 + belief_belief0l2[0] * belief0 +
                                            belief_belief0l2[1] * belief1 +
-                                           belief_belief0l2[2] * belief2 + 
+                                           belief_belief0l2[2] * belief2 +
                                            belief_belief0l2[3] * belief3)
             belief3t = (belief_constant3 + belief_belief0l3[0] * belief0 +
                                            belief_belief0l3[1] * belief1 +
-                                           belief_belief0l3[2] * belief2 + 
+                                           belief_belief0l3[2] * belief2 +
                                            belief_belief0l3[3] * belief3)
             for feature in range(features):
                 state0f = state0[feature]

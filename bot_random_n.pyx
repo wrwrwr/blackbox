@@ -53,7 +53,7 @@ cdef class Bot(BaseBot):
         time = c_get_time()
 
         for step in range(time, time + steps):
-            probsn = probs[step % n] 
+            probsn = probs[step % n]
             prob0 = probsn[0]
             prob1 = probsn[1]
             prob2 = probsn[2]

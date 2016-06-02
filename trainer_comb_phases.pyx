@@ -2,7 +2,7 @@
 Tries to find the best phase assignment for a number of seeds.
 
 Provide the seeds to combine using --stored-seeds. You may give the number of
-phases as the config, otherwise each seed is used in a single phase. 
+phases as the config, otherwise each seed is used in a single phase.
 """
 from itertools import product
 
