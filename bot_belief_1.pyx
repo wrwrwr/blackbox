@@ -13,10 +13,15 @@ the "unit" distribution when generating new parameters.
 
 Assumes 4 actions.
 """
+from cython import cclass, cfunc, locals, returns
+
+from bot_base cimport BaseBot
+
 from interface cimport c_do_action, c_get_state
 
 
-cdef class Bot(BaseBot):
+@cclass
+class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
             'constant': (level['actions'],),
@@ -28,21 +33,26 @@ cdef class Bot(BaseBot):
         }
         self.belief = 0
 
-    cdef Bot clone(self, bint state=True):
-        cdef Bot bot = BaseBot.clone(self, state)
+    @cfunc
+    @returns('Bot')
+    @locals(state='bint', bot='Bot')
+    def clone(self, state=True):
+        bot = BaseBot.clone(self, state)
         if state:
             bot.belief = self.belief
         else:
             bot.belief = 0
         return bot
 
-    cdef dict new_params(self, dict dists, tuple emphases):
-        cdef:
-            float belief_trust = dists['unit'].rvs(), \
-                  belief_lag = dists['unit'].rvs()
-            dict multipliers = self.param_multipliers, \
-                 params
-
+    @cfunc
+    @returns('dict')
+    @locals(dists='dict', emphases='tuple',
+            belief_trust='float', belief_lag='float',
+            multipliers='dict', params='dict')
+    def new_params(self, dists, emphases):
+        belief_trust = dists['unit'].rvs()
+        belief_lag = dists['unit'].rvs()
+        multipliers = self.param_multipliers
         multipliers['belief0l'] = belief_trust
         multipliers['belief_state0l'] = belief_lag
         multipliers['belief_belief0l'] = belief_trust * belief_lag
@@ -51,25 +61,32 @@ cdef class Bot(BaseBot):
         params['_belief_lag'] = belief_lag
         return params
 
-    cdef void act(self, int steps):
-        cdef:
-            int features = self.level['features'], \
-                step, feature, action = -1
-            float[:, :] state0l = self.params['state0l']
-            float[:] state0l0 = state0l[0], state0l1 = state0l[1], \
-                     state0l2 = state0l[2], state0l3 = state0l[3], \
-                     constant = self.params['constant'], \
-                     belief0l = self.params['belief0l'], \
-                     belief_state0l = self.params['belief_state0l']
-            float constant0 = constant[0], constant1 = constant[1], \
-                  constant2 = constant[2], constant3 = constant[3], \
-                  belief0l0 = belief0l[0], belief0l1 = belief0l[1], \
-                  belief0l2 = belief0l[2], belief0l3 = belief0l[3], \
-                  belief_constant = self.params['belief_constant'], \
-                  belief_belief0l = self.params['belief_belief0l'], \
-                  belief = self.belief, \
-                  value0, value1, value2, value3, state0f
-            float* state0
+    @cfunc
+    @returns('void')
+    @locals(steps='int', step='int', action='int',
+            features='int', feature='int',
+            constant0='float', constant1='float',
+            constant2='float', constant3='float',
+            state0l0='float[:]', state0l1='float[:]',
+            state0l2='float[:]', state0l3='float[:]',
+            belief0l0='float', belief0l1='float',
+            belief0l2='float', belief0l3='float',
+            belief_constant='float',
+            belief_state0l='float[:]',
+            belief_belief0l='float',
+            belief='float',
+            value0='float', value1='float', value2='float', value3='float',
+            state0='float*', state0f='float')
+    def act(self, steps):
+        features = self.level['features']
+        constant0, constant1, constant2, constant3 = self.params['constant']
+        state0l0, state0l1, state0l2, state0l3 = self.params['state0l']
+        belief0l0, belief0l1, belief0l2, belief0l3 = self.params['belief0l']
+        belief_constant = self.params['belief_constant']
+        belief_state0l = self.params['belief_state0l']
+        belief_belief0l = self.params['belief_belief0l']
+        belief = self.belief
+        action = -1
 
         for step in range(steps):
             value0 = constant0 + belief0l0 * belief

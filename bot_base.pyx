@@ -1,7 +1,7 @@
 from copy import deepcopy
 from libc.math cimport ceil, sqrt
 
-from cython import wraparound
+from cython import cast, ccall, cclass, cfunc, locals, returns, wraparound
 from numpy import asarray, empty, newaxis, ones, prod, repeat
 from numpy.random import randint
 
@@ -9,7 +9,8 @@ from interface cimport c_get_score
 from interface import reset_level
 
 
-cdef class BaseBot:
+@cclass
+class BaseBot:
     """
     Abstract bot class, defines the interface.
 
@@ -36,10 +37,16 @@ cdef class BaseBot:
     the values from all parameter sets. If parameters without the additional
     axis are loaded, the array is repeated with the same value for each set.
     """
+    @locals(level='dict', params='dict', param_map='dict',
+            param_freeze='tuple', param_scale='dict', dists='dict',
+            emphases='tuple', phases='float[:]',
+            steps='int', step='int', phase='int', phase_end='float',
+            key='str', target_key='str', shape='tuple', param='object',
+            scale='float', ndim='int', choices='int', reps='int',
+            param_shapes='dict')
     @wraparound(True)
-    def __init__(self, dict level, dict params={}, dict param_map={},
-                 tuple param_freeze=(), dict param_scale={},
-                 dict dists=None, tuple emphases=None, float[:] phases=None):
+    def __init__(self, level, params={}, param_map={}, param_freeze=(),
+                 param_scale={}, dists=None, emphases=None, phases=None):
         """
         Prepares the bot for the given level, fixing some parameters.
 
@@ -66,15 +73,8 @@ cdef class BaseBot:
         initialized. For instance, for phases (.25, .5, .75, 1.) it is set to
         [0, 0, ..., 0, 1, 1, ..., 1, 2, 2, ..., 2, 3, 3, ..., 3].
         """
-        cdef:
-            int steps = level['steps'], \
-                phase, step, ndim, choices, reps
-            float phase_end, scale
-            dict param_shapes = self.param_shapes
-            str key, target_key
-            tuple shape
-            object param
-
+        steps = level['steps']
+        param_shapes = self.param_shapes
         self.level = level
 
         if phases is None:
@@ -128,7 +128,8 @@ cdef class BaseBot:
                         # with more phases or congruences than it has choices.
                         if param.ndim < len(shape):
                             param = param[..., newaxis]
-                        reps = <int>ceil(<float>self.param_choices / choices)
+                        reps = cast('int', ceil(cast('float',
+                                                self.param_choices) / choices))
                         param = repeat(param, reps, axis=-1)
                         param = param[..., :self.param_choices]
                     self.params[target_key] = deepcopy(param)
@@ -147,14 +148,17 @@ cdef class BaseBot:
 
         self.last_action = -1
 
-    cdef BaseBot clone(self, bint state=True):
+    @cfunc
+    @returns('BaseBot')
+    @locals(state='bint', bot='BaseBot')
+    def clone(self, state=True):
         """
         Returns a copy of this bot, one that can vary parameters independently.
 
         If state is true, the current bot's state should be cloned, otherwise,
         bot's state should be initialized as if the bot was created anew.
         """
-        cdef BaseBot bot = self.__new__(type(self), self.level)
+        bot = self.__new__(type(self), self.level)
         bot.level = self.level
         bot.param_shapes = self.param_shapes
         bot.param_sizes = self.param_sizes
@@ -167,8 +171,14 @@ cdef class BaseBot:
             bot.last_action = self.last_action
         return bot
 
+    @cfunc
+    @returns('dict')
+    @locals(dists='dict', emphases='tuple',
+            features='int', feature='int', feature0='int', feature1='int',
+            multipliers='dict', params='dict', key='str', shape='tuple',
+            dist='object', coeffs='object', emp='float')
     @wraparound(True)
-    cdef dict new_params(self, dict dists, tuple emphases):
+    def new_params(self, dists, emphases):
         """
         Generates a new set of real parameters according to self.param_shapes,
         taking emphases into account for typical parameters.
@@ -176,15 +186,9 @@ cdef class BaseBot:
         Parameter arrays with keys containing "state" have emphases applied to
         their entries as if they were linear or quadratic state coefficients.
         """
-        cdef:
-            int features = self.level['features'], \
-                feature, feature0, feature1
-            float emp
-            dict multipliers = self.param_multipliers, \
-                 params = {}
-            object dist, coeffs
-            str key
-            tuple shape
+        features = self.level['features']
+        multipliers = self.param_multipliers
+        params = {}
 
         for key, shape in self.param_shapes.items():
             dist = dists['new'].get(key, dists['real'])
@@ -208,30 +212,33 @@ cdef class BaseBot:
             params[key] = coeffs
         return params
 
-    cdef void vary_params(self, dict dists, tuple emphases, float change,
-                           int variations):
+    @cfunc
+    @returns('void')
+    @locals(dists='dict', emphases='tuple', change='float', variations='int',
+            variation='int')
+    def vary_params(self, dists, emphases, change, variations):
         """
         Makes a couple of variations in a single call.
         """
-        cdef int variation
-
         for variation in range(variations):
             self.vary_param(dists, emphases, change)
 
+    @cfunc
+    @returns('void')
+    @locals(dists='dict', emphases='tuple', change='float',
+            features='int', feature0='int', feature1='int', entry='int',
+            key='str', size='int', array='object', dist='object',
+            multiplier='float', coeff='float')
     @wraparound(True)
-    cdef void vary_param(self, dict dists, tuple emphases, float change):
+    def vary_param(self, dists, emphases, change):
         """
         Randomly varies a single entry from parameter arrays.
 
         The change should be in (0, 1], where 1 means that a parameter should
         be redrawn, while .001 makes a very small variation.
         """
-        cdef:
-            int features = self.level['features'], \
-                entry, size, feature0, feature1
-            float coeff, multiplier = 1
-            object array, dist
-            str key
+        features = self.level['features']
+        multiplier = 1
 
         entry = randint(self.param_entries)
         for key, size in self.param_sizes.items():
@@ -252,7 +259,10 @@ cdef class BaseBot:
         coeff = dist.rvs() * multiplier
         array[entry] += change * (coeff - array[entry])
 
-    cpdef float evaluate(self, int runs):
+    @ccall
+    @returns('float')
+    @locals(runs='int', run='int', score='float')
+    def evaluate(self, runs):
         """
         Estimates the value of the current parameters by running the bot
         through a complete level.
@@ -260,11 +270,6 @@ cdef class BaseBot:
         If runs is given, repeats the level a couple of times and averages the
         score -- to account for non-determinism in bots behavior.
         """
-        cdef:
-            float score
-            int run
-
-        # Average score on a couple of runs.
         score = 0
         for run in range(runs):
             reset_level()
@@ -272,7 +277,10 @@ cdef class BaseBot:
             score += c_get_score()
         return score / runs
 
-    cdef void act(self, int steps):
+    @cfunc
+    @returns('void')
+    @locals(steps='int')
+    def act(self, steps):
         """
         The main bot function, performs actions not minding any consequences.
 

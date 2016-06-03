@@ -1,31 +1,38 @@
 """
 Linear with support for multiple param sets.
 """
+from cython import cclass, cfunc, locals, returns
+
+from bot_base cimport BaseBot
+
 from interface cimport c_do_action, c_get_state, c_get_time
 
 
-cdef class Bot(BaseBot):
+@cclass
+class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
             'constant': (level['actions'],),
             'state0l': (level['actions'], level['features'])
         }
 
-    cdef void act(self, int steps):
-        cdef:
-            int features = self.level['features'], \
-                time, step, choice, feature, action = -1
-            int[:] choices = self.choices
-            float[:, :, :] state0l = self.params['state0l']
-            float[:, :] state0l0 = state0l[0], state0l1 = state0l[1], \
-                        state0l2 = state0l[2], state0l3 = state0l[3], \
-                        constant = self.params['constant']
-            float[:] constant0 = constant[0], constant1 = constant[1], \
-                     constant2 = constant[2], constant3 = constant[3]
-            float value0, value1, value2, value3, state0f
-            float* state0
-
+    @cfunc
+    @returns('void')
+    @locals(steps='int', step='int', action='int', time='int',
+            features='int', feature='int', choices='int[:]', choice='int',
+            constant0='float[:]', constant1='float[:]',
+            constant2='float[:]', constant3='float[:]',
+            state0l0='float[:, :]', state0l1='float[:, :]',
+            state0l2='float[:, :]', state0l3='float[:, :]',
+            value0='float', value1='float', value2='float', value3='float',
+            state0='float*', state0f='float')
+    def act(self, steps):
+        features = self.level['features']
+        constant0, constant1, constant2, constant3 = self.params['constant']
+        state0l0, state0l1, state0l2, state0l3 = self.params['state0l']
+        choices = self.choices
         time = c_get_time()
+        action = -1
 
         for step in range(steps):
             choice = choices[time]

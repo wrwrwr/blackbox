@@ -3,13 +3,17 @@ Diffs 4 with support for multiple parameter sets.
 
 Assumes 4 actions.
 """
+from cython import cast, cclass, cfunc, locals, returns, sizeof
 from libc.stdlib cimport calloc, free
 from libc.string cimport memcpy
+
+from bot_base cimport BaseBot
 
 from interface cimport c_do_action, c_get_state, c_get_time
 
 
-cdef class Bot(BaseBot):
+@cclass
+class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
             'constant': (level['actions'],),
@@ -19,10 +23,10 @@ cdef class Bot(BaseBot):
             'diffs2l': (level['actions'], level['features']),
             'diffs3l': (level['actions'], level['features'])
         }
-        self.state1 = <float*>calloc(level['features'], sizeof(float))
-        self.state2 = <float*>calloc(level['features'], sizeof(float))
-        self.state3 = <float*>calloc(level['features'], sizeof(float))
-        self.state4 = <float*>calloc(level['features'], sizeof(float))
+        self.state1 = cast('float*', calloc(level['features'], sizeof(float)))
+        self.state2 = cast('float*', calloc(level['features'], sizeof(float)))
+        self.state3 = cast('float*', calloc(level['features'], sizeof(float)))
+        self.state4 = cast('float*', calloc(level['features'], sizeof(float)))
 
     def __dealloc__(self):
         free(self.state4)
@@ -30,11 +34,11 @@ cdef class Bot(BaseBot):
         free(self.state2)
         free(self.state1)
 
-    cdef Bot clone(self, bint state=True):
-        cdef:
-            Bot bot = BaseBot.clone(self, state)
-            int state_size
-
+    @cfunc
+    @returns('Bot')
+    @locals(state='bint', bot='Bot', state_size='int')
+    def clone(self, state=True):
+        bot = BaseBot.clone(self, state)
         if state:
             state_size = self.level['features'] * sizeof(float)
             memcpy(bot.state1, self.state1, state_size)
@@ -43,40 +47,44 @@ cdef class Bot(BaseBot):
             memcpy(bot.state4, self.state4, state_size)
         return bot
 
-    cdef void act(self, int steps):
-        cdef:
-            int features = self.level['features'], \
-                state_size = features * sizeof(float), \
-                time, step, choice, feature, action = -1
-            int[:] choices = self.choices
-            float[:, :, :] state0l = self.params['state0l'], \
-                           diffs0l = self.params['diffs0l'], \
-                           diffs1l = self.params['diffs1l'], \
-                           diffs2l = self.params['diffs2l'], \
-                           diffs3l = self.params['diffs3l']
-            float[:, :] state0l0 = state0l[0], state0l1 = state0l[1], \
-                        state0l2 = state0l[2], state0l3 = state0l[3], \
-                        diffs0l0 = diffs0l[0], diffs0l1 = diffs0l[1], \
-                        diffs0l2 = diffs0l[2], diffs0l3 = diffs0l[3], \
-                        diffs1l0 = diffs1l[0], diffs1l1 = diffs1l[1], \
-                        diffs1l2 = diffs1l[2], diffs1l3 = diffs1l[3], \
-                        diffs2l0 = diffs2l[0], diffs2l1 = diffs2l[1], \
-                        diffs2l2 = diffs2l[2], diffs2l3 = diffs2l[3], \
-                        diffs3l0 = diffs3l[0], diffs3l1 = diffs3l[1], \
-                        diffs3l2 = diffs3l[2], diffs3l3 = diffs3l[3], \
-                        constant = self.params['constant']
-            float[:] constant0 = constant[0], constant1 = constant[1], \
-                     constant2 = constant[2], constant3 = constant[3]
-            float value0, value1, value2, value3, \
-                  state0f, state1f, state2f, state3f, \
-                  diffs0f, diffs1f, diffs2f, diffs3f
-            float* state0
-            float* state1 = self.state1
-            float* state2 = self.state2
-            float* state3 = self.state3
-            float* state4 = self.state4
-
+    @cfunc
+    @returns('void')
+    @cfunc
+    @returns('void')
+    @locals(steps='int', step='int', action='int', time='int',
+            features='int', feature='int', state_size='int',
+            choices='int[:]', choice='int',
+            constant0='float[:]', constant1='float[:]',
+            constant2='float[:]', constant3='float[:]',
+            state0l0='float[:, :]', state0l1='float[:, :]',
+            state0l2='float[:, :]', state0l3='float[:, :]',
+            diffs0l0='float[:, :]', diffs0l1='float[:, :]',
+            diffs0l2='float[:, :]', diffs0l3='float[:, :]',
+            diffs1l0='float[:, :]', diffs1l1='float[:, :]',
+            diffs1l2='float[:, :]', diffs1l3='float[:, :]',
+            diffs2l0='float[:, :]', diffs2l1='float[:, :]',
+            diffs2l2='float[:, :]', diffs2l3='float[:, :]',
+            diffs3l0='float[:, :]', diffs3l1='float[:, :]',
+            diffs3l2='float[:, :]', diffs3l3='float[:, :]',
+            value0='float', value1='float', value2='float', value3='float',
+            state0='float*', state1='float*', state2='float*',
+            state3='float*', state4='float*',
+            state0f='float', state1f='float', state2f='float', state3f='float',
+            diffs0f='float', diffs1f='float', diffs2f='float', diffs3f='float')
+    def act(self, steps):
+        features = self.level['features']
+        state_size = features * sizeof(float)
+        constant0, constant1, constant2, constant3 = self.params['constant']
+        state0l0, state0l1, state0l2, state0l3 = self.params['state0l']
+        diffs0l0, diffs0l1, diffs0l2, diffs0l3 = self.params['diffs0l']
+        diffs1l0, diffs1l1, diffs1l2, diffs1l3 = self.params['diffs1l']
+        diffs2l0, diffs2l1, diffs2l2, diffs2l3 = self.params['diffs2l']
+        diffs3l0, diffs3l1, diffs3l2, diffs3l3 = self.params['diffs3l']
+        state1, state2, state3, state4 = (self.state1, self.state2,
+                                                    self.state3, self.state4)
+        choices = self.choices
         time = c_get_time()
+        action = -1
 
         for step in range(steps):
             choice = choices[time]
@@ -127,8 +135,6 @@ cdef class Bot(BaseBot):
             memcpy(state1, state0, state_size)
             time += 1
 
-        self.state1 = state1
-        self.state2 = state2
-        self.state3 = state3
-        self.state4 = state4
+        self.state1, self.state2, self.state3, self.state4 = (state1, state2,
+                                                                state3, state4)
         self.last_action = action

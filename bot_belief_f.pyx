@@ -8,13 +8,17 @@ adding a constant.
 
 Assumes 4 actions.
 """
+from cython import cast, cclass, cfunc, locals, returns, sizeof
 from libc.stdlib cimport calloc, free
 from libc.string cimport memcpy
+
+from bot_base cimport BaseBot
 
 from interface cimport c_do_action, c_get_state
 
 
-cdef class Bot(BaseBot):
+@cclass
+class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
             'constant': (level['actions'],),
@@ -24,31 +28,35 @@ cdef class Bot(BaseBot):
             'belief_state0l': (level['features'], level['features']),
             'belief_belief0l': (level['features'], level['features'])
         }
-        self.beliefs0 = <float*>calloc(level['features'], sizeof(float))
-        self.beliefs0t = <float*>calloc(level['features'], sizeof(float))
+        self.beliefs0 = cast('float*', calloc(level['features'],
+                                                        sizeof(float)))
+        self.beliefs0t = cast('float*', calloc(level['features'],
+                                                        sizeof(float)))
 
     def __dealloc__(self):
         free(self.beliefs0t)
         free(self.beliefs0)
 
-    cdef Bot clone(self, bint state=True):
-        cdef:
-            Bot bot = BaseBot.clone(self, state)
-            int beliefs_size
-
+    @cfunc
+    @returns('Bot')
+    @locals(state='bint', bot='Bot', beliefs_size='int')
+    def clone(self, state=True):
+        bot = BaseBot.clone(self, state)
         if state:
             beliefs_size = self.level['features'] * sizeof(float)
             memcpy(bot.beliefs0, self.beliefs0, beliefs_size)
             memcpy(bot.beliefs0t, self.beliefs0t, beliefs_size)
         return bot
 
-    cdef dict new_params(self, dict dists, tuple emphases):
-        cdef:
-            float belief_trust = dists['unit'].rvs(), \
-                  belief_lag = dists['unit'].rvs()
-            dict multipliers = self.param_multipliers, \
-                 params
-
+    @cfunc
+    @returns('dict')
+    @locals(dists='dict', emphases='tuple',
+            belief_trust='float', belief_lag='float',
+            multipliers='dict', params='dict')
+    def new_params(self, dists, emphases):
+        belief_trust = dists['unit'].rvs()
+        belief_lag = dists['unit'].rvs()
+        multipliers = self.param_multipliers
         multipliers['belief0l'] = belief_trust
         multipliers['belief_state0l'] = belief_lag
         multipliers['belief_belief0l'] = belief_trust * belief_lag
@@ -57,26 +65,34 @@ cdef class Bot(BaseBot):
         params['_belief_lag'] = belief_lag
         return params
 
-    cdef void act(self, int steps):
-        cdef:
-            int features = self.level['features'], \
-                step, feature, featureb, action = -1
-            float[:, :] state0l = self.params['state0l'], \
-                        belief0l = self.params['belief0l'], \
-                        belief_state0l = self.params['belief_state0l'], \
-                        belief_belief0l = self.params['belief_belief0l']
-            float[:] state0l0 = state0l[0], state0l1 = state0l[1], \
-                     state0l2 = state0l[2], state0l3 = state0l[3], \
-                     belief0l0 = belief0l[0], belief0l1 = belief0l[1], \
-                     belief0l2 = belief0l[2], belief0l3 = belief0l[3], \
-                     constant = self.params['constant'], \
-                     belief_constant = self.params['belief_constant']
-            float constant0 = constant[0], constant1 = constant[1], \
-                  constant2 = constant[2], constant3 = constant[3], \
-                  value0, value1, value2, value3, state0f, beliefs0f, belieft
-            float* state0
-            float* beliefs0 = self.beliefs0
-            float* beliefs0t = self.beliefs0t
+    @cfunc
+    @returns('void')
+    @locals(steps='int', step='int', action='int',
+            features='int', feature='int', featureb='int',
+            constant0='float', constant1='float',
+            constant2='float', constant3='float',
+            state0l0='float[:]', state0l1='float[:]',
+            state0l2='float[:]', state0l3='float[:]',
+            belief0l0='float[:]', belief0l1='float[:]',
+            belief0l2='float[:]', belief0l3='float[:]',
+            belief_constant='float[:]',
+            belief_state0l='float[:, :]',
+            belief_belief0l='float[:, :]',
+            beliefs0='float*', beliefs0t='float*',
+            value0='float', value1='float', value2='float', value3='float',
+            state0='float*', state0f='float',
+            beliefs0f='float', belieft='float')
+    def act(self, steps):
+        features = self.level['features']
+        constant0, constant1, constant2, constant3 = self.params['constant']
+        state0l0, state0l1, state0l2, state0l3 = self.params['state0l']
+        belief0l0, belief0l1, belief0l2, belief0l3 = self.params['belief0l']
+        belief_constant = self.params['belief_constant']
+        belief_state0l = self.params['belief_state0l']
+        belief_belief0l = self.params['belief_belief0l']
+        beliefs0 = self.beliefs0
+        beliefs0t = self.beliefs0t
+        action = -1
 
         for step in range(steps):
             value0 = constant0

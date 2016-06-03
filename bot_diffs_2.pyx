@@ -3,13 +3,17 @@ Linear regression with the state and two backward finite differences.
 
 Assumes 4 actions.
 """
+from cython import cast, cclass, cfunc, locals, returns, sizeof
 from libc.stdlib cimport calloc, free
 from libc.string cimport memcpy
+
+from bot_base cimport BaseBot
 
 from interface cimport c_do_action, c_get_state
 
 
-cdef class Bot(BaseBot):
+@cclass
+class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
             'constant': (level['actions'],),
@@ -17,46 +21,48 @@ cdef class Bot(BaseBot):
             'diffs0l': (level['actions'], level['features']),
             'diffs1l': (level['actions'], level['features'])
         }
-        self.state1 = <float*>calloc(level['features'], sizeof(float))
-        self.state2 = <float*>calloc(level['features'], sizeof(float))
+        self.state1 = cast('float*', calloc(level['features'], sizeof(float)))
+        self.state2 = cast('float*', calloc(level['features'], sizeof(float)))
 
     def __dealloc__(self):
         free(self.state2)
         free(self.state1)
 
-    cdef Bot clone(self, bint state=True):
-        cdef:
-            Bot bot = BaseBot.clone(self, state)
-            int state_size
-
+    @cfunc
+    @returns('Bot')
+    @locals(state='bint', bot='Bot', state_size='int')
+    def clone(self, state=True):
+        bot = BaseBot.clone(self, state)
         if state:
             state_size = self.level['features'] * sizeof(float)
             memcpy(bot.state1, self.state1, state_size)
             memcpy(bot.state2, self.state2, state_size)
         return bot
 
-    cdef void act(self, int steps):
-        cdef:
-            int features = self.level['features'], \
-                state_size = features * sizeof(float), \
-                step, feature, action = -1
-            float[:, :] state0l = self.params['state0l'], \
-                        diffs0l = self.params['diffs0l'], \
-                        diffs1l = self.params['diffs1l']
-            float[:] state0l0 = state0l[0], state0l1 = state0l[1], \
-                     state0l2 = state0l[2], state0l3 = state0l[3], \
-                     diffs0l0 = diffs0l[0], diffs0l1 = diffs0l[1], \
-                     diffs0l2 = diffs0l[2], diffs0l3 = diffs0l[3], \
-                     diffs1l0 = diffs1l[0], diffs1l1 = diffs1l[1], \
-                     diffs1l2 = diffs1l[2], diffs1l3 = diffs1l[3], \
-                     constant = self.params['constant']
-            float constant0 = constant[0], constant1 = constant[1], \
-                  constant2 = constant[2], constant3 = constant[3], \
-                  value0, value1, value2, value3, \
-                  state0f, state1f, diffs0f, diffs1f
-            float* state0
-            float* state1 = self.state1
-            float* state2 = self.state2
+    @cfunc
+    @returns('void')
+    @locals(steps='int', step='int', action='int',
+            features='int', feature='int', state_size='int',
+            constant0='float', constant1='float',
+            constant2='float', constant3='float',
+            state0l0='float[:]', state0l1='float[:]',
+            state0l2='float[:]', state0l3='float[:]',
+            diffs0l0='float[:]', diffs0l1='float[:]',
+            diffs0l2='float[:]', diffs0l3='float[:]',
+            diffs1l0='float[:]', diffs1l1='float[:]',
+            diffs1l2='float[:]', diffs1l3='float[:]',
+            value0='float', value1='float', value2='float', value3='float',
+            state0='float*', state1='float*', state2='float*',
+            state0f='float', state1f='float', diffs0f='float', diffs1f='float')
+    def act(self, steps):
+        features = self.level['features']
+        state_size = features * sizeof(float)
+        constant0, constant1, constant2, constant3 = self.params['constant']
+        state0l0, state0l1, state0l2, state0l3 = self.params['state0l']
+        diffs0l0, diffs0l1, diffs0l2, diffs0l3 = self.params['diffs0l']
+        diffs1l0, diffs1l1, diffs1l2, diffs1l3 = self.params['diffs1l']
+        state1, state2 = self.state1, self.state2
+        action = -1
 
         for step in range(steps):
             value0 = constant0
@@ -92,6 +98,5 @@ cdef class Bot(BaseBot):
             state2, state1 = state1, state2
             memcpy(state1, state0, state_size)
 
-        self.state1 = state1
-        self.state2 = state2
+        self.state1, self.state2 = state1, state2
         self.last_action = action

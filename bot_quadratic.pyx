@@ -4,10 +4,15 @@ action and chooses the one giving the highest value.
 
 Assumes 4 actions.
 """
+from cython import cclass, cfunc, locals, returns
+
+from bot_base cimport BaseBot
+
 from interface cimport c_do_action, c_get_state
 
 
-cdef class Bot(BaseBot):
+@cclass
+class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
             'constant': (level['actions'],),
@@ -15,21 +20,39 @@ cdef class Bot(BaseBot):
             'state0q': (level['actions'], level['features'], level['features'])
         }
 
-    cdef void act(self, int steps):
-        cdef:
-            int features = self.level['features'], \
-                step, feature0, feature1, action = -1
-            float[:, :, :] state0q = self.params['state0q']
-            float[:, :] state0q0 = state0q[0], state0q1 = state0q[1], \
-                        state0q2 = state0q[2], state0q3 = state0q[3], \
-                        state0l = self.params['state0l']
-            float[:] state0l0 = state0l[0], state0l1 = state0l[1], \
-                     state0l2 = state0l[2], state0l3 = state0l[3], \
-                     constant = self.params['constant']
-            float constant0 = constant[0], constant1 = constant[1], \
-                  constant2 = constant[2], constant3 = constant[3], \
-                  value0, value1, value2, value3, state0f0, state0f01
-            float* state0
+    @cfunc
+    @returns('void')
+    @locals(steps='int', step='int', action='int',
+            features='int', feature0='int', feature1='int',
+            constant='float[:]',
+            constant0='float', constant1='float',
+            constant2='float', constant3='float',
+            state0l='float[:, :]',
+            state0l0='float[:]', state0l1='float[:]',
+            state0l2='float[:]', state0l3='float[:]',
+            state0q='float[:, :, :]',
+            state0q0='float[:, :]', state0q1='float[:, :]',
+            state0q2='float[:, :]', state0q3='float[:, :]',
+            value0='float', value1='float', value2='float', value3='float',
+            state0='float*', state0f0='float', state0f01='float')
+    def act(self, steps):
+        features = self.level['features']
+        constant = self.params['constant']
+        constant0 = constant[0]
+        constant1 = constant[1]
+        constant2 = constant[2]
+        constant3 = constant[3]
+        state0l = self.params['state0l']
+        state0l0 = state0l[0]
+        state0l1 = state0l[1]
+        state0l2 = state0l[2]
+        state0l3 = state0l[3]
+        state0q = self.params['state0q']
+        state0q0 = state0q[0]
+        state0q1 = state0q[1]
+        state0q2 = state0q[2]
+        state0q3 = state0q[3]
+        action = -1
 
         for step in range(steps):
             value0 = constant0

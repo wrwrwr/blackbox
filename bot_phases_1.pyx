@@ -10,12 +10,16 @@ option, or better yet with the comb trainer.
 
 Assumes 4 actions.
 """
+from cython import cclass, cfunc, locals, returns
 from numpy import array
+
+from bot_base cimport BaseBot
 
 from interface cimport c_do_action, c_get_state, c_get_time
 
 
-cdef class Bot(BaseBot):
+@cclass
+class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
             'constantp0': (level['actions'],),
@@ -28,18 +32,23 @@ cdef class Bot(BaseBot):
         super().__init__(level, *args, **kwargs)
         self.params['phases'] = array([level['steps'] // 2])
 
-    cdef void act(self, int steps):
-        cdef:
-            int features = self.level['features'], \
-                phase1 = self.params['phases'][0], \
-                time, step, feature, action = -1
-            float[:, :] state0l
-            float[:] state0l0, state0l1, state0l2, state0l3, constant
-            float constant0, constant1, constant2, constant3, \
-                  value0, value1, value2, value3, state0f
-            float* state0
-
+    @cfunc
+    @returns('void')
+    @locals(steps='int', step='int', action='int', time='int', phase1='int',
+            features='int', feature='int',
+            constant='float[:]', state0l='float[:, :]',
+            constant0='float', constant1='float',
+            constant2='float', constant3='float',
+            state0l0='float[:]', state0l1='float[:]',
+            state0l2='float[:]', state0l3='float[:]',
+            value0='float', value1='float', value2='float', value3='float',
+            state0='float*', state0f='float')
+    def act(self, steps):
+        features = self.level['features']
         time = c_get_time()
+        phase1 = self.params['phases'][0]
+        action = -1
+
         if time < phase1:
             constant = self.params['constantp0']
             state0l = self.params['state0p0l']
@@ -47,14 +56,8 @@ cdef class Bot(BaseBot):
             constant = self.params['constantp1']
             state0l = self.params['state0p1l']
 
-        constant0 = constant[0]
-        constant1 = constant[1]
-        constant2 = constant[2]
-        constant3 = constant[3]
-        state0l0 = state0l[0]
-        state0l1 = state0l[1]
-        state0l2 = state0l[2]
-        state0l3 = state0l[3]
+        constant0, constant1, constant2, constant3 = constant
+        state0l0, state0l1, state0l2, state0l3 = state0l
 
         for step in range(steps):
             value0 = constant0
@@ -80,13 +83,7 @@ cdef class Bot(BaseBot):
             if time == phase1:
                 constant = self.params['constantp1']
                 state0l = self.params['state0p1l']
-                constant0 = constant[0]
-                constant1 = constant[1]
-                constant2 = constant[2]
-                constant3 = constant[3]
-                state0l0 = state0l[0]
-                state0l1 = state0l[1]
-                state0l2 = state0l[2]
-                state0l3 = state0l[3]
+                constant0, constant1, constant2, constant3 = constant
+                state0l0, state0l1, state0l2, state0l3 = state0l
 
         self.last_action = action

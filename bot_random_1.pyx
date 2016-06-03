@@ -3,35 +3,38 @@ Acts randomly, independently of state, with fixed frequencies of actions.
 
 Assumes 4 actions.
 """
+from cython import cast, cclass, cfunc, locals, returns
 from libc.stdlib cimport rand, RAND_MAX
-
-from numpy cimport ndarray
 from numpy.random import randint
+
+from bot_base cimport BaseBot
 
 from interface cimport c_do_action
 
 
-cdef class Bot(BaseBot):
+@cclass
+class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
             'probs': (level['actions'] - 1,)
         }
 
-    cdef dict new_params(self, dict dists, tuple emphases):
-        cdef:
-            ndarray[float, ndim=1] probs
-
+    @cfunc
+    @returns('dict')
+    @locals(dists='dict', emphases='tuple')
+    def new_params(self, dists, emphases):
         probs = dists['unit'].rvs(size=self.param_shapes['probs']).astype('f4')
         probs.sort()
         return {'probs': probs}
 
-    cdef void vary_param(self, dict dists, tuple emphases, float change):
-        cdef:
-            int actions = self.level['actions'], \
-                action
-            float[:] probs = self.params['probs']
-            float prob, min_prob, max_prob
-
+    @cfunc
+    @returns('void')
+    @locals(dists='dict', emphases='tuple', change='float',
+            actions='int', action='int', probs='float[:]',
+            prob='float', min_prob='float', max_prob='float')
+    def vary_param(self, dists, emphases, change):
+        actions = self.level['actions']
+        probs = self.params['probs']
         action = randint(actions - 1)
         prob = probs[action]
         prob += change * (dists['unit'].rvs() - prob)
@@ -40,15 +43,16 @@ cdef class Bot(BaseBot):
         probs[action] = (min_prob if prob < min_prob else
                                 (max_prob if prob > max_prob else prob))
 
-    cdef void act(self, int steps):
-        cdef:
-            int step, action = -1
-            float[:] probs = self.params['probs']
-            float prob0 = probs[0], prob1 = probs[1], prob2 = probs[2], \
-                  random
+    @cfunc
+    @returns('void')
+    @locals(steps='int', step='int', action='int',
+            prob0='float', prob1='float', prob2='float', random='float')
+    def act(self, steps):
+        prob0, prob1, prob2 = self.params['probs']
+        action = -1
 
         for step in range(steps):
-            random = <float>rand() / RAND_MAX
+            random = cast('float', rand() / RAND_MAX)
             action = ((0 if random < prob0 else 1)
                                 if random < prob1 else
                                         (2 if random < prob2 else 3))
