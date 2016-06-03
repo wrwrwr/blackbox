@@ -3,8 +3,10 @@ Combines stored seeds into a multi-parameter set finding the phase assignment.
 
 Takes the number of phases as the config.
 """
+from warnings import warn
+
 from cython import ccall, cclass, locals, returns
-from numpy import linspace, stack
+from numpy import allclose, linspace, stack
 
 from bot_base cimport BaseBot
 from trainer_base cimport BaseTrainer
@@ -36,7 +38,9 @@ class Trainer(BaseTrainer):
             if key[0] != '_':
                 combined_params[key] = stack(arrays, axis=-1)
             else:
-                # TODO: Warn if not equal.
+                for array in arrays:
+                    if not allclose(array, arrays[0]):
+                        warn("Combining params with differing meta-parameters")
                 combined_params[key] = arrays[0]
         combined_params['_phases'] = self.phases
 

@@ -5,9 +5,10 @@ Provide the seeds to combine using --stored-seeds. You may give the number of
 phases as the config, otherwise each seed is used in a single phase.
 """
 from itertools import product
+from warnings import warn
 
 from cython import ccall, cclass, locals, returns
-from numpy import stack
+from numpy import allclose, stack
 
 from bot_base cimport BaseBot
 from trainer_comb cimport Trainer as TrainerComb
@@ -24,8 +25,6 @@ class Trainer(TrainerComb):
             seeds='list', index='int', key='str', arrrays='list',
             indices='list')
     def train(self):
-        # TODO: Passing in bots as seeds turns out not to be such a good
-        # idea after all.
         bot_class = type(self.seeds[0][0])
         best_score = float('-inf')
         best_combined_params = {}
@@ -43,7 +42,9 @@ class Trainer(TrainerComb):
                 if key[0] != '_':
                     combined_params[key] = stack(arrays, axis=-1)
                 else:
-                    # TODO: Warn if not equal.
+                    for array in arrays:
+                        if not allclose(array, arrays[0]):
+                            warn("Combining with differing meta-parameters")
                     combined_params[key] = arrays[0]
             combined_params['_phases'] = self.phases
 
