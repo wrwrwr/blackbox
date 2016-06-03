@@ -2,22 +2,25 @@
 Collects (state, following states) tuples, trying each action at every step of
 the level run.
 """
+from cython import ccall, cclass, locals, returns
 from numpy import empty
+
+from collector_base import BaseCollector
 
 from interface cimport c_do_action, c_get_state
 
 
-cdef class Collector(BaseCollector):
-    cpdef dict collect(self):
-        cdef:
-            int features = self.level['features'], \
-                actions = self.level['actions'], \
-                steps = self.level['steps'], \
-                step, checkpoint, action, feature
-            float[:, :] states
-            float[:, :, :] following_states
-            float* state
-
+@cclass
+class Collector(BaseCollector):
+    @ccall
+    @returns('dict')
+    @locals(steps='int', step='int', actions='int', action='int',
+            features='int', feature='int', state='float*', checkpoint='int',
+            states='float[:, :]', following_states='float[:, :, :]')
+    def collect(self):
+        steps = self.level['steps']
+        actions = self.level['actions']
+        features = self.level['features']
         states = empty((steps, features), dtype='f4')
         following_states = empty((steps, actions, features), dtype='f4')
 

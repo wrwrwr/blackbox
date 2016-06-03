@@ -1,14 +1,16 @@
+from cython import ccall, cclass, cfunc, locals, returns
+
 from interface import (clear_all_checkpoints, create_checkpoint,
                        load_from_checkpoint)
 
-from bot_base cimport BaseBot
 
-
-cdef class BaseCollector:
+@cclass
+class BaseCollector:
     """
     Abstract collector class, defines the interface.
     """
-    def __cinit__(self, dict level, BaseBot bot):
+    @locals(level='dict', bot='BaseBot')
+    def __cinit__(self, level, bot):
         """
         Initializes the collector for the given level and bot.
         """
@@ -16,7 +18,10 @@ cdef class BaseCollector:
         self.bot = bot
         self.checkpoints = []
 
-    cdef int create_checkpoint(self):
+    @cfunc
+    @returns('int')
+    @locals(checkpoint='int', bot='BaseBot')
+    def create_checkpoint(self):
         """
         Marks game and bot state for future restoration.
         """
@@ -25,7 +30,10 @@ cdef class BaseCollector:
         self.checkpoints.append((checkpoint, bot))
         return len(self.checkpoints) - 1
 
-    cdef void load_checkpoint(self, int index):
+    @cfunc
+    @returns('void')
+    @locals(index='int', checkpoint='int', bot='BaseBot')
+    def load_checkpoint(self, index):
         """
         Brings the game and bot state to a past point.
         """
@@ -33,14 +41,18 @@ cdef class BaseCollector:
         load_from_checkpoint(checkpoint)
         self.bot = bot
 
-    cdef void clear_checkpoints(self):
+    @cfunc
+    @returns('void')
+    def clear_checkpoints(self):
         """
         Removes all checkpoints (potentially freeing up a lot of space).
         """
         clear_all_checkpoints()
         self.checkpoints = []
 
-    cpdef dict collect(self):
+    @ccall
+    @returns('dict')
+    def collect(self):
         """
         The main collector function, returns a dict of data to be stored.
         """

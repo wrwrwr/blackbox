@@ -6,19 +6,26 @@ seed generation in the core), or to choose the best params from a stored set.
 
 Does not need and config.
 """
+from cython import ccall, cclass, locals, returns
+
 from bot_base cimport BaseBot
+from trainer_base cimport BaseTrainer
 
 
-cdef class Trainer(BaseTrainer):
-    cpdef tuple train(self):
-        cdef:
-            float best_score = float('-inf'), score
-            BaseBot best_bot = None, bot
-            list best_history = [], history
-            int runs = self.runs
+@cclass
+class Trainer(BaseTrainer):
+    @ccall
+    @returns('tuple')
+    @locals(best_score='float', score='float',
+            best_bot=BaseBot, bot=BaseBot,
+            best_history='list', history='list')
+    def train(self):
+        best_score = float('-inf')
+        best_bot = None
+        best_history = []
 
         for bot, history in self.seeds:
-            score = bot.evaluate(runs)
+            score = bot.evaluate(self.runs)
             if score > best_score:
                 best_score = score
                 best_bot = bot

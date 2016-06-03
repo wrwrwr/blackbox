@@ -2,22 +2,25 @@
 Collects (state, immediate rewards) tuples, trying each action at every step
 of the level playthrough.
 """
+from cython import ccall, cclass, locals, returns
 from numpy import empty
+
+from collector_base import BaseCollector
 
 from interface cimport c_do_action, c_get_score, c_get_state
 
 
-cdef class Collector(BaseCollector):
-    cpdef dict collect(self):
-        cdef:
-            int features = self.level['features'], \
-                actions = self.level['actions'], \
-                steps = self.level['steps'], \
-                step, checkpoint, action, feature
-            float[:, :] states, rewards
-            float* state
-            float score
-
+@cclass
+class Collector(BaseCollector):
+    @ccall
+    @returns('dict')
+    @locals(steps='int', step='int', actions='int', action='int',
+            features='int', feature='int', state='float*', checkpoint='int',
+            states='float[:, :]', rewards='float[:, :]', score='float')
+    def collect(self):
+        steps = self.level['steps']
+        actions = self.level['actions']
+        features = self.level['features']
         states = empty((steps, features), dtype='f4')
         rewards = empty((steps, actions), dtype='f4')
 

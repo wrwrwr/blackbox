@@ -8,29 +8,40 @@ the variation scales should be floats between 0 and 1.
 Moreover, --dist_variations can be used to control the count of parameters
 changed at once at each step.
 """
+from cython import ccall, cclass, locals, returns
+
 from bot_base cimport BaseBot
+from trainer_base cimport BaseTrainer
 
 
-cdef class Trainer(BaseTrainer):
-    def __cinit__(self, dict level, tuple config, dict dists, tuple emphases,
-                  tuple seeds, int runs):
+@cclass
+class Trainer(BaseTrainer):
+    @locals(level='dict', config='tuple', dists='dict', emphases='tuple',
+            seeds='tuple', runs='int')
+    def __cinit__(self, level, config, dists, emphases, seeds, runs):
         self.steps = int(config[0])
         self.change_high = float(config[1])
         self.change_low = float(config[2])
 
-    cpdef tuple train(self):
-        cdef:
-            dict dists = self.dists
-            object variations_rvs = dists['variations'].rvs
-            tuple emphases = self.emphases
-            float change_high = self.change_high, \
-                  change_diff = change_high - self.change_low, \
-                  best_score = float('-inf'), best_seed_score, score, change
-            BaseBot best_bot = None, best_seed_bot, bot
-            list best_history = [], history
-            int steps = self.steps, \
-                runs = self.runs, \
-                step, variations
+    @ccall
+    @returns('tuple')
+    @locals(dists='dict', variation_rvs='object', emphases='tuple',
+            runs='int', steps='int', step='int',
+            change_high='float', change_diff='float', change='float',
+            best_score='float', best_seed_score='float', score='float',
+            best_bot=BaseBot, base_seed_bot=BaseBot, bot=BaseBot,
+            best_history='list', history='list', variations='int')
+    def train(self):
+        dists = self.dists
+        variations_rvs = dists['variations'].rvs
+        emphases = self.emphases
+        runs = self.runs
+        steps = self.steps
+        change_high = self.change_high
+        change_diff = change_high - self.change_low
+        best_score = float('-inf')
+        best_bot = None
+        best_history = []
 
         for bot, history in self.seeds:
             best_seed_score = bot.evaluate(runs)

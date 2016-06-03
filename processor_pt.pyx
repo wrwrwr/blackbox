@@ -4,11 +4,17 @@ first glance at possible temporal patterns.
 
 Processes data from the ssa processor.
 """
+from cython import ccall, cclass, returns
 from numpy import diff, zeros
 
+from processor_base cimport BaseProcessor
 
-cdef class Processor(BaseProcessor):
-    cpdef object process(self):
+
+@cclass
+class Processor(BaseProcessor):
+    @ccall
+    @returns('object')
+    def process(self):
         bots = []
         levels = []
         action_counts = zeros(self.max_actions, dtype='i4')

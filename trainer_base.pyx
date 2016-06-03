@@ -1,9 +1,14 @@
-cdef class BaseTrainer:
+from cython import ccall, cclass, locals, returns
+
+
+@cclass
+class BaseTrainer:
     """
     Abstract trainer class, defines the interface, exposes level data.
     """
-    def __cinit__(self, dict level, tuple config, dict dists, tuple emphases,
-                  tuple seeds, int runs):
+    @locals(level='dict', config='tuple', dists='dict', emphases='tuple',
+            seeds='tuple', runs='int')
+    def __cinit__(self, level, config, dists, emphases, seeds, runs):
         """
         Initializes the trainer for the given level and config.
 
@@ -22,7 +27,9 @@ cdef class BaseTrainer:
         self.seeds = seeds
         self.runs = runs
 
-    cpdef tuple train(self):
+    @ccall
+    @returns('tuple')
+    def train(self):
         """
         The main trainer function, returns the new params and their history.
         """

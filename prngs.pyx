@@ -1,4 +1,4 @@
-from libc.stdlib cimport rand, srand
+from libc.stdlib cimport srand
 from numpy.random import randint, seed as nseed
 
 

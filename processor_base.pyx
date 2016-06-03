@@ -1,11 +1,15 @@
 from collections import OrderedDict as odict
 
+from cython import ccall, cclass, cfunc, locals, returns
 
-cdef class BaseProcessor:
+
+@cclass
+class BaseProcessor:
     """
     Abstract processor class, defines the interface.
     """
-    def __cinit__(self, tuple data):
+    @locals(data='tuple')
+    def __cinit__(self, data):
         """
         Initializes the processor for the given data sets.
 
@@ -14,23 +18,30 @@ cdef class BaseProcessor:
         in the set.
         """
         self.data = data
-        self.max_features = max(m['level']['features'] for _, m in data)
-        self.max_actions = max(m['level']['actions'] for _, m in data)
-        self.max_steps = max(m['level']['steps'] for _, m in data)
+        # WA: Cython doesn't like just "data" in the following three.
+        self.max_features = max(m['level']['features'] for _, m in self.data)
+        self.max_actions = max(m['level']['actions'] for _, m in self.data)
+        self.max_steps = max(m['level']['steps'] for _, m in self.data)
 
-    cdef object results(self, tuple entries):
+    @cfunc
+    @returns('object')
+    @locals(entries='tuple')
+    def results(self, entries):
         """
         Common parts of processors output (meta information on records).
         """
-        bots = ("{} {}".format(*meta['bot']) for _, meta in self.data)
-        levels = (meta['level']['key'] for _, meta in self.data)
+        # WA: Cython's compiler crashes if the following are generators.
+        bots = ["{} {}".format(*m['bot']) for _, m in self.data]
+        levels = [m['level']['key'] for _, m in self.data]
         info = odict((
             ("bots", ", ".join(bots)),
             ("levels", ", ".join(levels))))
         info.update(entries)
         return info
 
-    cpdef object process(self):
+    @ccall
+    @returns('object')
+    def process(self):
         """
         The main processor function, returns an ordered dict of data to print.
         """

@@ -3,11 +3,17 @@ Prints correlations between state components.
 
 Can consume any data that contains consequent states (srs, ssa, sss).
 """
+from cython import ccall, cclass, returns
 from numpy import corrcoef, nonzero, transpose, triu, zeros
 
+from processor_base cimport BaseProcessor
 
-cdef class Processor(BaseProcessor):
-    cpdef object process(self):
+
+@cclass
+class Processor(BaseProcessor):
+    @ccall
+    @returns('object')
+    def process(self):
         corrs = zeros((self.max_features, self.max_features), dtype='f4')
         steps = 0
 

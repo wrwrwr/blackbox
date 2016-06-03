@@ -26,31 +26,42 @@ Two probability distributions are used: --dist_variations controls the number
 of parameters changed at once at each step, and --dist_accept decides whether
 to continue with a mutated bot or keep the previous one.
 """
+from cython import ccall, cclass, locals, returns
+
 from bot_base cimport BaseBot
+from trainer_base cimport BaseTrainer
 
 
-cdef class Trainer(BaseTrainer):
-    def __cinit__(self, dict level, tuple config, dict dists, tuple emphases,
-                  tuple seeds, int runs):
+@cclass
+class Trainer(BaseTrainer):
+    @locals(level='dict', config='tuple', dists='dict', emphases='tuple',
+            seeds='tuple', runs='int')
+    def __cinit__(self, level, config, dists, emphases, seeds, runs):
         self.steps = int(config[0])
         self.acceptance_ease = float(config[1])
         self.change = float(config[2])
 
-    cpdef tuple train(self):
-        cdef:
-            dict dists = self.dists
-            object variations_rvs = dists['variations'].rvs, \
-                   acceptance_rvs = dists['acceptance'].rvs
-            tuple emphases = self.emphases
-            float acceptance_ease = self.acceptance_ease, \
-                  change = self.change, \
-                  best_score = float('-inf'), best_seed_score, score, \
-                  improvement, acceptance_mult
-            BaseBot best_bot = None, best_seed_bot, bot
-            list best_history = [], history
-            int steps = self.steps, \
-                runs = self.runs, \
-                step, variations
+    @ccall
+    @returns('tuple')
+    @locals(dists='dict', variation_rvs='object', acceptance_rvs='object',
+            emphases='tuple', runs='int', steps='int', step='int',
+            acceptance_ease='float', change='float',
+            best_score='float', best_seed_score='float', score='float',
+            best_bot=BaseBot, base_seed_bot=BaseBot, bot=BaseBot,
+            best_history='list', history='list',
+            variations='int', improvement='float', acceptance_mult='float')
+    def train(self):
+        dists = self.dists
+        variations_rvs = dists['variations'].rvs
+        acceptance_rvs = dists['acceptance'].rvs
+        emphases = self.emphases
+        runs = self.runs
+        steps = self.steps
+        acceptance_ease = self.acceptance_ease
+        change = self.change
+        best_score = float('-inf')
+        best_bot = None
+        best_history = []
 
         for bot, history in self.seeds:
             best_seed_score = bot.evaluate(runs)

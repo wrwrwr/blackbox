@@ -3,11 +3,17 @@ Shows information about the first few states.
 
 Needs data from the sss collector.
 """
+from cython import ccall, cclass, returns
 from numpy import empty, var
 
+from processor_base cimport BaseProcessor
 
-cdef class Processor(BaseProcessor):
-    cpdef object process(self):
+
+@cclass
+class Processor(BaseProcessor):
+    @ccall
+    @returns('object')
+    def process(self):
         records_count = len(self.data)
         features = self.max_features
         actions = self.max_actions

@@ -3,11 +3,17 @@ Calculates various global statistics on state and rewards.
 
 Requires data from the srs collector.
 """
+from cython import ccall, cclass, returns
 from numpy import zeros, diff, fabs, sqrt, where
 
+from processor_base cimport BaseProcessor
 
-cdef class Processor(BaseProcessor):
-    cpdef object process(self):
+
+@cclass
+class Processor(BaseProcessor):
+    @ccall
+    @returns('object')
+    def process(self):
         rewards = zeros(self.max_actions, dtype='f4')
         totals = zeros(self.max_features, dtype='f4')
         variances = zeros(self.max_features, dtype='f4')
