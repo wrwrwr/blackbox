@@ -25,7 +25,7 @@ class Bot(BaseBot):
             'belief_state0l': (4, level['features']),
             'belief_belief0l': (4, 4)
         }
-        self.belief0 = self.belief1 = self.belief2 = self.belief3 = 0
+        self.beliefs = [0] * 4
 
     @cfunc
     @returns('Bot')
@@ -33,10 +33,7 @@ class Bot(BaseBot):
     def clone(self, state=True):
         bot = BaseBot.clone(self, state)
         if state:
-            bot.belief0 = self.belief0
-            bot.belief1 = self.belief1
-            bot.belief2 = self.belief2
-            bot.belief3 = self.belief3
+            bot.beliefs = self.beliefs[:]
         return bot
 
     @cfunc
@@ -60,102 +57,80 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int',
-            constant0='float', constant1='float',
-            constant2='float', constant3='float',
-            state0l0='float[:]', state0l1='float[:]',
-            state0l2='float[:]', state0l3='float[:]',
-            belief0l0='float[:]', belief0l1='float[:]',
-            belief0l2='float[:]', belief0l3='float[:]',
-            belief_constant0='float', belief_constant1='float',
-            belief_constant2='float', belief_constant3='float',
-            belief_state0l0='float[:]', belief_state0l1='float[:]',
-            belief_state0l2='float[:]', belief_state0l3='float[:]',
-            belief_belief0l0='float[:]', belief_belief0l1='float[:]',
-            belief_belief0l2='float[:]', belief_belief0l3='float[:]',
-            belief0='float', belief0t='float',
-            belief1='float', belief1t='float',
-            belief2='float', belief2t='float',
-            belief3='float', belief3t='float',
-            value0='float', value1='float', value2='float', value3='float',
+            constant='float[4]', state0l='float[:, :]', belief0l='float[:, :]',
+            belief_constant='float[4]',
+            belief_state0l='float[:, :]',
+            belief_belief0l='float[:, :]',
+            beliefs='float[4]', beliefst='float[4]', values='float[4]',
             state0='float*', state0f='float')
     def act(self, steps):
         features = self.level['features']
-        constant0, constant1, constant2, constant3 = self.params['constant']
-        state0l0, state0l1, state0l2, state0l3 = self.params['state0l']
-        belief0l0, belief0l1, belief0l2, belief0l3 = self.params['belief0l']
-        (belief_constant0, belief_constant1, belief_constant2,
-                            belief_constant3) = self.params['belief_constant']
-        (belief_state0l0, belief_state0l1, belief_state0l2,
-                            belief_state0l3) = self.params['belief_state0l']
-        (belief_belief0l0, belief_belief0l1, belief_belief0l2,
-                            belief_belief0l3) = self.params['belief_belief0l']
-        belief0 = self.belief0
-        belief1 = self.belief1
-        belief2 = self.belief2
-        belief3 = self.belief3
+        constant = self.params['constant']
+        state0l = self.params['state0l']
+        belief0l = self.params['belief0l']
+        belief_constant = self.params['belief_constant']
+        belief_state0l = self.params['belief_state0l']
+        belief_belief0l = self.params['belief_belief0l']
+        beliefs = self.beliefs[:]
         action = -1
 
         for step in range(steps):
-            value0 = (constant0 + belief0l0[0] * belief0 +
-                                  belief0l0[1] * belief1 +
-                                  belief0l0[2] * belief2 +
-                                  belief0l0[3] * belief3)
-            value1 = (constant1 + belief0l1[0] * belief0 +
-                                  belief0l1[1] * belief1 +
-                                  belief0l1[2] * belief2 +
-                                  belief0l1[3] * belief3)
-            value2 = (constant2 + belief0l2[0] * belief0 +
-                                  belief0l2[1] * belief1 +
-                                  belief0l2[2] * belief2 +
-                                  belief0l2[3] * belief3)
-            value3 = (constant3 + belief0l3[0] * belief0 +
-                                  belief0l3[1] * belief1 +
-                                  belief0l3[2] * belief2 +
-                                  belief0l3[3] * belief3)
+            values = constant[:]
+            values[0] += (belief0l[0, 0] * beliefs[0] +
+                          belief0l[0, 1] * beliefs[1] +
+                          belief0l[0, 2] * beliefs[2] +
+                          belief0l[0, 3] * beliefs[3])
+            values[1] += (belief0l[1, 0] * beliefs[0] +
+                          belief0l[1, 1] * beliefs[1] +
+                          belief0l[1, 2] * beliefs[2] +
+                          belief0l[1, 3] * beliefs[3])
+            values[2] += (belief0l[2, 0] * beliefs[0] +
+                          belief0l[2, 1] * beliefs[1] +
+                          belief0l[2, 2] * beliefs[2] +
+                          belief0l[2, 3] * beliefs[3])
+            values[3] += (belief0l[3, 0] * beliefs[0] +
+                          belief0l[3, 1] * beliefs[1] +
+                          belief0l[3, 2] * beliefs[2] +
+                          belief0l[3, 3] * beliefs[3])
             state0 = c_get_state()
             for feature in range(features):
                 state0f = state0[feature]
-                value0 += state0l0[feature] * state0f
-                value1 += state0l1[feature] * state0f
-                value2 += state0l2[feature] * state0f
-                value3 += state0l3[feature] * state0f
-            action = (((0 if value0 > value3 else 3)
-                                    if value0 > value2 else
-                                                (2 if value2 > value3 else 3))
-                                if value0 > value1 else
-                        ((1 if value1 > value3 else 3)
-                                    if value1 > value2 else
-                                                (2 if value2 > value3 else 3)))
+                values[0] += state0l[0, feature] * state0f
+                values[1] += state0l[1, feature] * state0f
+                values[2] += state0l[2, feature] * state0f
+                values[3] += state0l[3, feature] * state0f
+            action = (((0 if values[0] > values[3] else 3)
+                                if values[0] > values[2] else
+                                        (2 if values[2] > values[3] else 3))
+                                if values[0] > values[1] else
+                        ((1 if values[1] > values[3] else 3)
+                                if values[1] > values[2] else
+                                        (2 if values[2] > values[3] else 3)))
             c_do_action(action)
-            belief0t = (belief_constant0 + belief_belief0l0[0] * belief0 +
-                                           belief_belief0l0[1] * belief1 +
-                                           belief_belief0l0[2] * belief2 +
-                                           belief_belief0l0[3] * belief3)
-            belief1t = (belief_constant1 + belief_belief0l1[0] * belief0 +
-                                           belief_belief0l1[1] * belief1 +
-                                           belief_belief0l1[2] * belief2 +
-                                           belief_belief0l1[3] * belief3)
-            belief2t = (belief_constant2 + belief_belief0l2[0] * belief0 +
-                                           belief_belief0l2[1] * belief1 +
-                                           belief_belief0l2[2] * belief2 +
-                                           belief_belief0l2[3] * belief3)
-            belief3t = (belief_constant3 + belief_belief0l3[0] * belief0 +
-                                           belief_belief0l3[1] * belief1 +
-                                           belief_belief0l3[2] * belief2 +
-                                           belief_belief0l3[3] * belief3)
+            beliefst = belief_constant[:]
+            beliefst[0] += (belief_belief0l[0, 0] * beliefs[0] +
+                            belief_belief0l[0, 1] * beliefs[1] +
+                            belief_belief0l[0, 2] * beliefs[2] +
+                            belief_belief0l[0, 3] * beliefs[3])
+            beliefst[1] += (belief_belief0l[1, 0] * beliefs[0] +
+                            belief_belief0l[1, 1] * beliefs[1] +
+                            belief_belief0l[1, 2] * beliefs[2] +
+                            belief_belief0l[1, 3] * beliefs[3])
+            beliefst[2] += (belief_belief0l[2, 0] * beliefs[0] +
+                            belief_belief0l[2, 1] * beliefs[1] +
+                            belief_belief0l[2, 2] * beliefs[2] +
+                            belief_belief0l[2, 3] * beliefs[3])
+            beliefst[3] += (belief_belief0l[3, 0] * beliefs[0] +
+                            belief_belief0l[3, 1] * beliefs[1] +
+                            belief_belief0l[3, 2] * beliefs[2] +
+                            belief_belief0l[3, 3] * beliefs[3])
             for feature in range(features):
                 state0f = state0[feature]
-                belief0t += belief_state0l0[feature] * state0f
-                belief1t += belief_state0l1[feature] * state0f
-                belief2t += belief_state0l2[feature] * state0f
-                belief3t += belief_state0l3[feature] * state0f
-            belief0 = belief0t
-            belief1 = belief1t
-            belief2 = belief2t
-            belief3 = belief3t
+                beliefst[0] += belief_state0l[0, feature] * state0f
+                beliefst[1] += belief_state0l[1, feature] * state0f
+                beliefst[2] += belief_state0l[2, feature] * state0f
+                beliefst[3] += belief_state0l[3, feature] * state0f
+            beliefs, beliefst = beliefst, beliefs
 
-        self.belief0 = belief0
-        self.belief1 = belief1
-        self.belief2 = belief2
-        self.belief3 = belief3
+        self.beliefs = beliefs[:]
         self.last_action = action

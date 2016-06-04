@@ -1,6 +1,9 @@
+*.c
+*.html
 .benchmarks/
 .cache/
 __pycache__/
+blackbox.egg-info/
 data/*.npz
 interface*
 levels/*.data
