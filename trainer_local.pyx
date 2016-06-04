@@ -1,5 +1,5 @@
 """
-A random local search.
+A randomized local search.
 
 At each step a number of random parameter entries are interpolated between the
 old value and a redrawn value. If the new parameters give a better score, they
@@ -7,7 +7,7 @@ are kept, otherwise the old set is preserved.
 
 The config should consist of an integer and a float, the number of steps and
 the variation scale respectively. Moreover, --dist_variations can be used to
-control the count of parameter variations to do at once at each step.
+control the count of parameter variations to try at once at each step.
 """
 from cython import ccall, cclass, locals, returns
 

@@ -1,11 +1,6 @@
 """
 Holds a belief for a hidden state, of the same length as the visible state.
 
-The belief is updated linearly, by multiplying the current state and belief
-by a matrix and adding a constant vector. Actions are also evaluated linearly,
-weighting each component of the state and each component of the belief and
-adding a constant.
-
 Assumes 4 actions.
 """
 from cython import cast, cclass, cfunc, locals, returns, sizeof

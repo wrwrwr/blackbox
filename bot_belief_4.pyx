@@ -1,10 +1,6 @@
 """
 Holds a belief for 4 float values.
 
-The beliefs are updated linearly, by multiplying the current state and beliefs
-by a matrix and adding a vector. Actions are also evaluated linearly, weighting
-each component of the state and each belief and adding a constant.
-
 Assumes 4 actions.
 """
 from cython import cclass, cfunc, locals, returns

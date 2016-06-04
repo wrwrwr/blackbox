@@ -1,8 +1,8 @@
 """
 Makes sequences of 5 steps randomly, with a set of probabilities for each step.
 
-Assumes 4 actions. Cannot make less than 5 steps at a time.
-Some 10-15% faster than the N implementation.
+Assumes 4 actions. Cannot make less than 5 steps at a time. Used to be 10-15%
+faster than the N implementation, but doesn't seem to be any longer.
 """
 from cython import cast, cclass, cfunc, locals, returns
 from libc.stdlib cimport rand, RAND_MAX

@@ -1,6 +1,6 @@
 """
 Collects (state, following states) tuples, trying each action at every step of
-the level run.
+a level run.
 """
 from cython import ccall, cclass, locals, returns
 from numpy import empty

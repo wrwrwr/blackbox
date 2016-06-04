@@ -1,7 +1,9 @@
 """
-Acts randomly, independently of state, with almost equal action probabilities.
+Acts randomly, independently of the state, with equal action probabilities.
 
-This is the default bot used by collectors.
+This is the default bot used by collectors. The probabilities are only almost
+equal due to a slight random-number generation bias (with correctness given up
+for speed).
 """
 from cython import cclass, cfunc, locals, returns
 from libc.stdlib cimport rand

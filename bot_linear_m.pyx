@@ -1,5 +1,5 @@
 """
-Linear with support for multiple param sets.
+Linear with support for multi-value parameter sets.
 """
 from cython import cclass, cfunc, declare, locals, returns
 

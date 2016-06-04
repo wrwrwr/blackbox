@@ -1,6 +1,6 @@
 """
 Collects (state, immediate rewards) tuples, trying each action at every step
-of the level playthrough.
+of a level playthrough.
 """
 from cython import ccall, cclass, locals, returns
 from numpy import empty

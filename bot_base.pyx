@@ -17,7 +17,7 @@ class BaseBot:
     Exposes level and params info and provides generic implementations of
     cloning, parameter generation and mutation. Can handle emphases, phases
     (or multiple parameter sets in general), parameter mapping, freezing and
-    selecting specific distributions for parameters.
+    selecting specific distributions for parameter mutation and variation.
 
     The base constructor precalculates parameter array sizes and their total
     count of entries. The only info that a subclass should provide is a
@@ -33,9 +33,9 @@ class BaseBot:
 
     The base class manages a self.choices array, each entry in this array is
     the number of the parameters set that should be used at the said time.
-    Parameter arrays automatically get an additional inner-most axis collecting
-    the values from all parameter sets. If parameters without the additional
-    axis are loaded, the array is repeated with the same value for each set.
+    Parameter arrays get an additional inner-most axis collecting the values
+    from all parameter sets. If parameters without the additional axis are
+    loaded, the array is repeated with the same value for each set.
     """
     @locals(level='dict', params='dict', param_map='dict',
             param_freeze='tuple', param_scale='dict', dists='dict',
@@ -52,24 +52,25 @@ class BaseBot:
 
         You may provide a dictionary of (bot-specific) parameters or give the
         info needed to generate a new random set: a dict of distributions for
-        free-values randomization and a tuple of state feature emphases.
+        entries randomization and a tuple of state feature emphases.
 
         The param_map dict serves to translate arrays from the input seed to
-        other arrays in bot's parameters. Source arrays keys should be mapped
+        other arrays in bot's parameters. Source array keys should be mapped
         to lists of target keys.
 
         Listing params in param_freeze prevents them from being varied.
 
-        Loaded params may be prescaled to fit them for another bot.
+        Loaded params may be prescaled to fit them for another bot, by using
+        the param_scale dict.
 
         If both params, and dists and emphases, are given, params may contain
         just a subset of needed parameter arrays, the rest will be randomized
         (as if parameters were newly generated).
 
-        Phases may be a list of phase ends as level time fractions; overrides
-        phases info stored with params.
+        Phases may be a list of phase ends as level time fractions, these
+        override phases info stored together with parameters.
         If phases, as given or as found under '_phases' key in the params dict,
-        contains anything more than a single entry (1.), the choices array is
+        contains anything more than a single entry, the choices array is
         initialized. For instance, for phases (.25, .5, .75, 1.) it is set to
         [0, 0, ..., 0, 1, 1, ..., 1, 2, 2, ..., 2, 3, 3, ..., 3].
         """
@@ -288,6 +289,6 @@ class BaseBot:
         number of actions that can be played.
 
         The bot is responsible for storing the last action it made (-1 if it
-        didn't do any) as self.last_action (for collectors use).
+        did not do any) as self.last_action (for collectors use).
         """
         raise NotImplementedError()

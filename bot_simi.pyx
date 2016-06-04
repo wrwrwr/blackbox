@@ -1,6 +1,7 @@
 """
-A bot that remembers some previously seen states, actions taken and rewards and
-decides based on the similarity of the current state to each of the previous.
+A bot that remembers some previously seen states, actions and rewards and
+decides by presuming that states similar to the past ones will give similar
+rewards for the same action.
 
 Assumes 4 actions.
 """

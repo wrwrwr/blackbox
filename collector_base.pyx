@@ -45,7 +45,7 @@ class BaseCollector:
     @returns('void')
     def clear_checkpoints(self):
         """
-        Removes all checkpoints (potentially freeing up a lot of space).
+        Removes all checkpoints (potentially freeing up some memory).
         """
         clear_all_checkpoints()
         self.checkpoints = []

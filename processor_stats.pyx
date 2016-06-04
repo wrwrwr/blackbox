@@ -1,5 +1,5 @@
 """
-Calculates various global statistics on state and rewards.
+Calculates various global statistics about state and rewards.
 
 Requires data from the srs collector.
 """
@@ -33,6 +33,6 @@ class Processor(BaseProcessor):
         return self.results((
                 ("average rewards", rewards / steps),
                 ("state component means", totals / steps),
-                ("state standard deviationss", sqrt(variances / steps)),
+                ("state standard deviations", sqrt(variances / steps)),
                 ("change frequencies", changes / steps),
                 ("change > 1 frequencies", large_changes / steps)))

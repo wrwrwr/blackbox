@@ -1,5 +1,5 @@
 """
-Calculates a (multivariable) quadratic polynomial over the state for each
+Calculates a (multi-variable) quadratic polynomial over the state for each
 action and chooses the one giving the highest value.
 
 Assumes 4 actions.

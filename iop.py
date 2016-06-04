@@ -174,7 +174,7 @@ def load_params(bot, key, verbosity):
     with load(path) as data:
         params = dict(data)
 
-    # Some backwards compatiblity bits.
+    # Some backwards compatibility bits.
     history = list(params.pop('__history', params.pop('history', [])))
     if 'coeffs' in params:
         if key.startswith('linear'):
@@ -299,7 +299,7 @@ def seeds_desc(seeds, verbosity):
 
 def param_map_desc(param_map):
     """
-    Stringifies param_map dict in an "arrowy" style.
+    Stringifies parameter mappings.
     """
     return "\n".join("{}: {}".format(k, " ".join(nks))
                      for k, nks in param_map.items())

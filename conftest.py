@@ -1,5 +1,5 @@
 """
-Monkeypatch pycodestyle, to let it process cimports as imports.
+Monkey-patch pycodestyle, to let it process cimports as imports.
 """
 
 

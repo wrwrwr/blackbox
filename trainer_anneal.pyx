@@ -1,5 +1,5 @@
 """
-A "probabilistic" simplified simulated annealing.
+A "probabilistic", simplified simulated annealing.
 
 At each step a number of parameters are redrawn and the bot is evaluated with
 the new parameters. Then a random threshold is drawn and scaled by a power of
@@ -12,7 +12,7 @@ The config should consist of three values: the number of steps (integer),
 an easing factor for the effects of the acceptance distribution (float),
 and a variation scale (float).
 
-The thresholds drawn from the acceptance distribution are multpilied by the
+The thresholds drawn from the acceptance distribution are multiplied by the
 fraction of the level left raised to the power of the easing factor, thus a
 factor of 0 lets declines be accepted (with some probability) from the start
 till the end of the training session, while a high factor only allows declines
@@ -23,8 +23,8 @@ between newly drawn values and their old values (rather than being redrawn
 anew).
 
 Two probability distributions are used: --dist_variations controls the number
-of parameters changed at once at each step, and --dist_accept decides whether
-to continue with a mutated bot or keep the previous one.
+of parameters changed at once at each step, and --dist_acceptance decides
+whether to continue with a mutated bot or keep the previous one.
 """
 from cython import ccall, cclass, locals, returns
 

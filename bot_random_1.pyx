@@ -1,5 +1,5 @@
 """
-Acts randomly, independently of state, with fixed frequencies of actions.
+Acts randomly, independently of the state, with fixed frequencies of actions.
 
 Assumes 4 actions.
 """

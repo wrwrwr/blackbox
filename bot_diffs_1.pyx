@@ -1,10 +1,10 @@
 """
 Linear regression with the state and its backward finite differences.
 
-Multiplies each component of the current state and the difference between it
-and the last state by a weight and chooses the action for which the sum plus
-a constant is the biggest. Similar to double-state linear, but with different
-training accents.
+Multiplies each component of the current state and the difference between the
+current state and the last state by a weight and chooses the action for which
+the sum plus a free coefficient is the biggest. Similar to a double-state
+linear bot, but with different training accents.
 
 Assumes 4 actions.
 """

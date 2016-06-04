@@ -10,7 +10,7 @@ least 3 things need to be chosen:
   arguments that are passed to the trainer, the first one is usually
   the number of steps.
 
-After that many different options can be given, some notable are:
+After that, many different options can be given, some notable are:
 
 --iterations
     controls the count of full training sessions; best parameters from each one
@@ -20,9 +20,9 @@ After that many different options can be given, some notable are:
     serve to choose the starting point, either the best params out of a random
     pool or a set loaded from a file;
 
---dist_new_param and --dist_vary_param
+--dist_param_new and --dist_param_vary
     can be used to specify a distribution for a parameter array generation or
-    mutation, they take the name of the array and a SciPy stats distribution
+    mutation; they take the name of the array and a SciPy stats distribution
     key and arguments;
 
 --dist_variations
@@ -38,23 +38,23 @@ After that many different options can be given, some notable are:
     important than other;
 
 --param_map, --param_freeze, and --param_scale
-    are there to translate parts of a parameter set from one bot to another.
+    translate parts of a parameter set from one bot to another.
 
 A simple invocation could look as follows:
 
-    ./train.py linear local 1000
+    ./train.py linear local 1000 1
 
 This would make a thousand steps of the random local search trainer, starting
 from a random parameters for the linear bot. If this was your first run, the
-results would be saved as params/linear_0.npz`.
+results would be saved as params/linear_0.npz.
 
-To start from a previous seed and emphasize the last state component ten-fold:
+To start from the last result and emphasize the last state component ten-fold:
 
-    ./train.py linear local 1000 --stored_seed 0 --emphasis 36 10
+    ./train.py linear local 1000 1 --stored_seed 0 --emphasis 35 10
 
-And to now reuse your linear coefficients for the diffs_1 bot:
+And to now bootstrap the diffs_1 bot with your linear coefficients:
 
-    ./train.py diffs_1 local 1000 -ss 1 -dnp diffs0l norm 0 .01
+    ./train.py diffs_1 local 1000 1 -ss linear_1 -dpn diffs0l norm 0 .01
 """
 from numpy import array
 

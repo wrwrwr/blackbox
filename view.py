@@ -7,8 +7,8 @@ what's inside it:
     ./view.py linear 0
 
 A training record is appended to the history kept with parameters after each
-session. Only the latest parameter values are stored in a single file; the
-trace lists keys of past sets, ask the viewer about them to see past entries.
+session, though only the latest parameter values are stored in a single file.
+Trace lists keys of past sets, ask the viewer about them to see past entries.
 
 Reproducing training sessions using the stored pseudo-random generator seeds is
 limited to the same machine, the same NumPy version (the same random sequences
@@ -21,7 +21,7 @@ from textwrap import indent
 from core import available_bots
 from iop import load_params, params_desc, parse_args, seeds_desc, training_desc
 
-description = "Display a params set and its history."
+description = "Display a parameters set and its history."
 arguments = (
     (('bot',), {
         'choices': available_bots.keys(),

@@ -8,7 +8,7 @@ The game consists of a number of steps, at each step the agent chooses one of
 the available actions (a small integer) seeing just some undescribed state (a
 bunch of floats), and gets a score update in return.
 
-Such a formulation covers a wide range of [reinforced learning problems][rlp],
+Such a formulation covers a wide subset of [reinforced learning problems][rlp],
 allowing the toolkit to be potentially used for various optimization tasks.
 
 [BlackBox Challenge]: http://blackboxchallenge.com/
@@ -19,14 +19,14 @@ allowing the toolkit to be potentially used for various optimization tasks.
 Just a short excerpt from a few pages long list of notes and todos:
 
 * In its current form, the toolkit presents just a simplistic, evolutionary
-  approach, all of the coded trainers treat the blackbox opaquely, not looking
-  at intermediate level scores.
-* The optimization process requires a human to choose the results for further
-  extention and refinement; and humans are not that easy to come by ;-)
+  approach, all of the coded trainers treat the blackbox opaquely, not even
+  looking at intermediate level scores.
+* The optimization process still requires a human to choose the results for
+  further extension and refinement; and humans are not that easy to come by ;-)
 * Parts of the toolkit are over-optimized; for instance, trainers that could
   benefit from statically compiled code are quite imaginable, but none of the
   implemented ones really needs it.
-* The bot interface should be extended to allow more educated trainers.
+* The bot interface should be extended to allow more sophisticated trainers.
 
 #### Pros
 
@@ -35,14 +35,14 @@ some nice attributes:
 
 * Simple interface between bots and trainers, each trainer can train every bot.
 * C-speed bots, trainers, collectors, and processors; writing a new bot only
-  requires describing its parmeters and coding a single function.
+  requires describing its parameters and coding a single function.
 * Extensive training infrastructure: seed trainers with previous results, move
   parts of parameter sets between bots, use different parameter sets for parts
   of levels, or emphasize components of the state.
 * Most of the training configuration is done using probability distributions,
   rather than fixed constants, giving a lot of flexibility.
 
-## Intallation
+## Installation
 
 Requires [Python][] >= 3.4, [NumPy][] >= 1.11, and [Cython][] >= 0.24.
 Currently the only way to use the toolkit is to clone the source from GitHub
@@ -54,8 +54,8 @@ the folder that this file is in.
 
 Alternatively, code an interface for your own problem according to the
 [specification][]! Both Python and C API has to be provided, but there are no
-requirements on the levels content or format, other than the interface can use
-them.
+requirements on the levels content or format, other than that the interface can
+use them.
 
 The file and directory structure should look as follows:
 
@@ -70,7 +70,7 @@ The file and directory structure should look as follows:
     ├ trainer_*.pyx         (trainer implementations)
     ├ trainers.pyx          (add new trainers here)
     ...
-    ├ inteface.[pxd,so]     (the game inteface should be here)
+    ├ interface.[pxd,so]    (the game interface should be here)
 ```
 
 [Python]: https://www.python.org/
@@ -87,11 +87,11 @@ and more examples can be found within their module docstrings.
 
 ### [train][]
 
-The main command. Takes a bot name, trainer name and a config for it (plus a
-ton of optional parameters). For example:
+Takes a bot name, trainer name and a configuration for it (plus a ton of
+optional parameters). For example:
 
 ```bash
-    ./train.py linear local 100
+    ./train.py linear local 100 1
 ```
 
 starts a random local search for a set of coefficients for a linear regression
@@ -114,8 +114,8 @@ available levels.
 
 ### [view][]
 
-Lets you see a set of coefficients and their history. To review the just
-generated coefficients you would type:
+Lets you see a set of coefficients and their history. To review the
+coefficients generated above you would type:
 
 ```bash
     ./view.py linear 0
@@ -140,7 +140,7 @@ Analyzes data sets gathered by a collector to display statistics or preprocess
 them for a trainer.
 
 ```bash
-    ./process.py stats srs_0
+    ./process.py stats srs 0
 ```
 
 [process]: blob/master/process.py
@@ -157,7 +157,7 @@ and levels).
 The agents choosing the actions. 
 
 All current bot implementations assume 4 actions, some can only play a
-particular number of actions on each ``act()`` call.
+particular number of steps on each ``act()`` call.
 
 ### [linear][]
 
@@ -167,7 +167,7 @@ A simple regression bot, optimized.
 
 ### [belief][]
 
-Bots that try to predict an entry, or a few, of the hidden state, and evaluate
+Bots that try to simulate an entry, or a few, of the hidden state, and evaluate
 actions using state reinforced with beliefs.
 
 The present bots simply update the beliefs linearly based on their previous
@@ -205,7 +205,7 @@ step, odd step) or some other temporal patterns.
 
 ## Trainers
 
-The problem solvers, or optimization algoritms.
+The problem solvers, or optimization algorithms.
 
 ### [local][]
 
@@ -224,8 +224,8 @@ you feel you are stuck in a local maximum
 ### [_d suffix][]
 
 Instead of taking a single variation scale, these variants are configured with
-a high and low value and gradually diminish variations during the course of a
-training session.
+a high and low value and gradually diminish parameter variations during the
+course of a training session.
 
 [_d suffix]: blob/master/trainer_local_d.pyx
 

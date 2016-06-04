@@ -8,8 +8,8 @@ The Belief lag and belief trust meta-parameters influence the generation of
 the coefficients. Belief lag weakens the dependence of the belief on the state,
 a value of .1 would make the belief update based on the state 10 times smaller
 than the belief update based on the previous belief. Similarly, belief trust
-weakens the impact of the belief on actions evaluation. Both are drawn from
-the "unit" distribution when generating new parameters.
+weakens the impact of the belief on action evaluation. Both are drawn from the
+"unit" distribution when generating new parameters.
 
 Assumes 4 actions.
 """

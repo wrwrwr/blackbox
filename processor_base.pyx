@@ -13,9 +13,12 @@ class BaseProcessor:
         """
         Initializes the processor for the given data sets.
 
-        The data should be a tuple of (record, level info) pairs. The level
-        infos are prescanned to find the maximum features, actions and steps
-        in the set.
+        The data should be a tuple of (record, meta info) pairs. The meta info
+        should contain level that the data was collected from and the bot that
+        was used for the purpose.
+
+        The meta data is prescanned to find the maximum numbers of features,
+        actions and steps in the set.
         """
         self.data = data
         # WA: Cython doesn't like just "data" in the following three.

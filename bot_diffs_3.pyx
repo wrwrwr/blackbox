@@ -1,5 +1,5 @@
 """
-Linear regression with the state and three backward finite differences.
+Linear regression using the state and three backward finite differences.
 
 Assumes 4 actions.
 """

@@ -1,5 +1,5 @@
 """
-Calculates rewards per action, phase and step congruency class. Can give a
+Calculates rewards per action, phase, and step congruency class. Can give a
 first glance at possible temporal patterns.
 
 Processes data from the ssa processor.

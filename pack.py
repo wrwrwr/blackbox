@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-A command-line utitlity for creating self-contained bot packages. Call it with
+A command-line utility for creating self-contained bot packages. Call it with
 a bot name and a parameters key:
 
     ./pack.py linear 0
@@ -11,12 +11,12 @@ You could unpack the archive using the standard tar utility:
 
     tar -xzf linear_0.tar.gz
 
-and then run the bot with (assuming inteface and levels are in the folder):
+and then run the bot with (assuming interface and levels are in the folder):
 
     python3 ./bot.py
 
 When working with a package and the full framework on the same machine, it
-may be necessary to clean Cython's build files between their invocations):
+may be necessary to clean Cython's build files between their invocations:
 
     rm -r ~/.pyxbld/*
 """
@@ -26,7 +26,7 @@ from tarfile import open as taropen
 from core import available_bots
 from iop import parse_args, resolve_path
 
-description = "Pack a bot with some params for submission."
+description = "Pack a bot with parameters for distribution."
 arguments = (
     (('bot',), {
         'choices': available_bots.keys(),

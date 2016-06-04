@@ -1,5 +1,5 @@
 """
-Records a level playthrough, sequences of states, scores and actions.
+Records a level playthrough -- sequences of states, scores and actions.
 
 The n-th record in states and scores holds the values before the n-th action.
 The final state and score are also stored (thus the actions array is one item

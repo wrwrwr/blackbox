@@ -1,5 +1,5 @@
 """
-The random local search with smaller and smaller changes.
+The randomized local search with smaller and smaller changes.
 
 The config should consist of three values: the number of steps (integer), the
 starting variation scale (high) and the ending variation scale (low). Both of

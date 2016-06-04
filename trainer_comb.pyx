@@ -1,7 +1,9 @@
 """
-Combines stored seeds into a multi-parameter set finding the phase assignment.
+Combines stored seeds into a multi-parameter set.
 
-Takes the number of phases as the config.
+Takes the number of phases as the config, splitting the level into the given
+number of equal parts (if the phases count does not match the seeds count, the
+parameter values will be repeated by the base bot).
 """
 from warnings import warn
 

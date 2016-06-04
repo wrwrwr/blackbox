@@ -1,11 +1,11 @@
 """
-The probabilistic simplified simulated annealing with diminishing changes.
+The probabilistic, simplified simulated annealing with diminishing variations.
 
 The config should consist of four values: the number of steps (integer), an
 acceptance distribution easing factor (float power), the starting variation
 scale (float ~1), and the ending variation scale (float ~0).
 
-Two distributions, --dist_variations and --dist_accept, are used as in the
+Two distributions, --dist_variations and --dist_acceptance, are used as in the
 basic anneal trainer.
 """
 from cython import ccall, cclass, locals, returns

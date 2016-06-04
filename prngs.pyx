@@ -9,7 +9,7 @@ def seed_prngs(seed=None):
 
     In critical sections you can find some pretty biased usage of rand().
     It had better not been used at all, but is quite a bit faster than other
-    options and likely sufficient is the cases it is used.
+    options and likely sufficient in the cases it is used.
     """
     if seed is None:
         # We want to store the actual seed, so need to explicitly generate it.

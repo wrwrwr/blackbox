@@ -1,8 +1,9 @@
 """
-A trainer that simply chooses the best seed from the ones provided to it.
+A trainer that simply chooses the best seed from the ones given to it.
 
 This may be used for a simple Monte-Carlo simulation (combined with the random
-seed generation in the core), or to choose the best params from a stored set.
+seed generation in the core), or to choose the best parameters set from a
+collection of stored sets.
 
 Does not need and config.
 """
