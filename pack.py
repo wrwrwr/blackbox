@@ -15,8 +15,8 @@ and then run the bot with (assuming interface and levels are in the folder):
 
     python3 ./bot.py
 
-When working with a package and the full framework on the same machine, it
-may be necessary to clean Cython's build files between their invocations:
+When working with a standalone package and the framework on the same machine,
+it may be necessary to clean Cython's build files between their invocations:
 
     rm -r ~/.pyxbld/*
 """
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     args = parse_args(description, arguments)
 
     for params in args.params_sets:
-        params_key, params_filename = resolve_path(args.bot, params)
+        params_key, params_filename = resolve_path(args.bot, params, 'params')
         pack = 'packs/{}.tar.gz'.format(params_key)
         with taropen(pack, 'w:gz') as archive:
             archive.add('packs/template/bot.py', 'bot.py')

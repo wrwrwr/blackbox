@@ -12,15 +12,14 @@ Multiple inputs can be listed and processed together:
 from core import available_processors, do_process
 from iop import date_desc, parse_args, results_desc, time_desc
 
-description = "Process some previously collected data."
+description = "Process previously collected data."
 arguments = (
     (('processor',), {
         'choices': available_processors.keys(),
         'help': "processor to use"
     }),
     (('input_',), {
-        'nargs': 2,
-        'action': 'append',
+        'nargs': '+',
         'metavar': 'input',
         'help': "data to process, for example srs 0 srs 1 srs 3"
     }),
@@ -43,6 +42,9 @@ arguments = (
 
 if __name__ == '__main__':
     args = parse_args(description, arguments)
+    if len(args.input_) % 2 != 0:
+        raise ValueError("Please give a list of (collector, data key) pairs")
+    args.input_ = tuple(zip(args.input_[::2], args.input_[1::2]))
 
     results, info = do_process(**vars(args))
 

@@ -3,7 +3,7 @@
 """
 A command-line utility for gathering data. Only a collector name is required:
 
-    ./collect.py sas
+    ./collect.py ssa
 
 By default the random bot is used to wander across the training level. Another
 bot or level can be selected using --bot (name and params key) and --level.
