@@ -12,7 +12,7 @@ the needed coefficients (matched by key):
 
 Multiple parameter sets can be evaluated at once with a bit of shell magic:
 
-    ./play.py linear `ls params/linear_*.npz` --ignore_exceptions
+    ./play.py linear `ls params/linear_*.npz` --ignore_exceptions --verbosity=0
 """
 from core import available_bots, do_play
 from iop import date_desc, parse_args, scores_desc, time_desc

@@ -144,7 +144,11 @@ def resolve_path(agent, key, folder):
         key = first_free(join(folder, agent)) - 1
     if isinstance(key, int) or key.isdigit():
         key = '{}_{}'.format(agent, key)
-    path = join(dirname(__file__), folder, key)
+    path = dirname(__file__)
+    if not key.startswith(folder):
+        path = join(path, folder, key)
+    else:
+        path = join(path, key)
     if not path.endswith('.npz'):
         path = '{}.npz'.format(path)
     return key, path
