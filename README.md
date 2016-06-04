@@ -97,7 +97,7 @@ optional parameters). For example:
 starts a random local search for a set of coefficients for a linear regression
 bot.
 
-[train]: blob/master/train.py
+[train]: train.py
 
 ### [play][]
 
@@ -110,7 +110,7 @@ Evaluates a bot on selected levels and prints out the scores. For instance:
 would play the bot with the coefficients found in the previous section on all
 available levels.
 
-[play]: blob/master/play.py
+[play]: play.py
 
 ### [view][]
 
@@ -121,7 +121,7 @@ coefficients generated above you would type:
     ./view.py linear 0
 ```
 
-[view]: blob/master/view.py
+[view]: view.py
 
 ### [collect][]
 
@@ -132,7 +132,7 @@ taken, or intermediate rewards:
     ./collect.py srs --bot linear 0
 ```
 
-[collect]: blob/master/collect.py
+[collect]: collect.py
 
 ### [process][]
 
@@ -143,14 +143,14 @@ them for a trainer.
     ./process.py stats srs 0
 ```
 
-[process]: blob/master/process.py
+[process]: process.py
 
 ### [pack][]
 
 Creates a standalone bot package (that still requires the game interface
 and levels).
 
-[pack]: blob/master/pack.py
+[pack]: pack.py
 
 ## Bots
 
@@ -163,7 +163,7 @@ particular number of steps on each ``act()`` call.
 
 A simple regression bot, optimized.
 
-[linear]: blob/master/bot_linear.pyx
+[linear]: bot_linear.pyx
 
 ### [belief][]
 
@@ -173,13 +173,13 @@ actions using state reinforced with beliefs.
 The present bots simply update the beliefs linearly based on their previous
 values and the visible state, and use linear regression for action choosing.
 
-[belief]: blob/master/bot_belief_1.pyx
+[belief]: bot_belief_1.pyx
 
 ### [states][]
 
 Linear regression using the current and the last state.
 
-[states]: blob/master/bot_states_1.pyx
+[states]: bot_states_1.pyx
 
 ### [diffs][]
 
@@ -187,13 +187,13 @@ Approximates action value as a linear function of the state components and
 their derivatives (with respect to level time). Or actually, uses finite
 backward differences to approximate the derivatives.
 
-[diffs]: blob/master/bot_diffs_1.pyx
+[diffs]: bot_diffs_1.pyx
 
 ### [quadratic][]
 
 Adds a coefficient for each pair of state components.
 
-[quadratic]: blob/master/bot_quadratic.pyx
+[quadratic]: bot_quadratic.pyx
 
 ### [_m suffix][]
 
@@ -201,7 +201,7 @@ Bots that can use different sets of coefficients at different parts of the
 level. The "parts" may be phases (first half, second half), congruences (even
 step, odd step) or some other temporal patterns.
 
-[_m suffix]: blob/master/bot_linear_m.pyx
+[_m suffix]: bot_linear_m.pyx
 
 ## Trainers
 
@@ -212,14 +212,14 @@ The problem solvers, or optimization algorithms.
 Randomly changes a number of parameter entries at each step. Can either redraw
 values anew or do slight adjustments, according to a variation scale given.
 
-[local]: blob/master/trainer_local.pyx
+[local]: trainer_local.pyx
 
 ### [anneal][]
 
 Almost a random local search, but sometimes accepts score drops. Useful when
 you feel you are stuck in a local maximum
 
-[anneal]: blob/master/trainer_anneal.pyx
+[anneal]: trainer_anneal.pyx
 
 ### [_d suffix][]
 
@@ -227,26 +227,26 @@ Instead of taking a single variation scale, these variants are configured with
 a high and low value and gradually diminish parameter variations during the
 course of a training session.
 
-[_d suffix]: blob/master/trainer_local_d.pyx
+[_d suffix]: trainer_local_d.pyx
 
 ### [select][]
 
 Chooses the best from the seeds provided.
 
-[select]: blob/master/trainer_select.pyx
+[select]: trainer_select.pyx
 
 ### [comb][]
 
 Combines several parameter sets into a single multi-parameter set (for an "_m"
 bot).
 
-[comb]: blob/master/trainer_comb.pyx
+[comb]: trainer_comb.pyx
 
 ### [comb_phases][]
 
 Tries all phase assignments printing their evaluations.
 
-[comb_phases]: blob/master/trainer_comb_phases.pyx
+[comb_phases]: trainer_comb_phases.pyx
 
 ## Collectors
 
@@ -258,19 +258,19 @@ and save them for later processing.
 
 Checks possible immediate rewards after each state.
 
-[srs]: blob/master/collector_srs.pyx
+[srs]: collector_srs.pyx
 
 ### [ssa][]
 
 Stores states encountered, scores seen, and actions done during a playthrough.
 
-[ssa]: blob/master/collector_ssa.pyx
+[ssa]: collector_ssa.pyx
 
 ### [sss][]
 
 Finds all states that could have come after each state.
 
-[sss]: blob/master/collector_sss.pyx
+[sss]: collector_sss.pyx
 
 ## Processors
 
@@ -281,22 +281,22 @@ of responsibilities lets you quickly realize new investigations.
 
 How do the first few states look? How do they depend on the first few actions?
 
-[init]: blob/master/processor_init.pyx
+[init]: processor_init.pyx
 
 ### [stats][]
 
 How does the state look on average? What are typical rewards for actions?
 
-[stats]: blob/master/processor_stats.pyx
+[stats]: processor_stats.pyx
 
 ### [corrs][]
 
 Are the state components independent from each other?
 
-[corrs]: blob/master/processor_corrs.pyx
+[corrs]: processor_corrs.pyx
 
 ### [pt][]
 
 What was going on during that playthrough?
 
-[pt]: blob/master/processor_pt.pyx
+[pt]: processor_pt.pyx
