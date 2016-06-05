@@ -46,16 +46,16 @@ class Bot(BaseBot):
     @cfunc
     @returns('void')
     @locals(steps='int', step='int', action='int',
-            prob0='float', prob1='float', prob2='float', random='float')
+            probs='float[3]', random='float')
     def act(self, steps):
-        prob0, prob1, prob2 = self.params['probs']
+        probs = self.params['probs']
         action = -1
 
         for step in range(steps):
             random = cast('float', rand() / RAND_MAX)
-            action = ((0 if random < prob0 else 1)
-                                if random < prob1 else
-                                        (2 if random < prob2 else 3))
+            action = ((0 if random < probs[0] else 1)
+                                if random < probs[1] else
+                                        (2 if random < probs[2] else 3))
             c_do_action(action)
 
         self.last_action = action

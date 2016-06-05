@@ -3,7 +3,7 @@ Diffs 4 with support for multiple parameter sets.
 
 Assumes 4 actions.
 """
-from cython import cast, cclass, cfunc, locals, returns, sizeof
+from cython import cast, cclass, cfunc, declare, locals, returns, sizeof
 from libc.stdlib cimport calloc, free
 from libc.string cimport memcpy
 
@@ -49,24 +49,12 @@ class Bot(BaseBot):
 
     @cfunc
     @returns('void')
-    @cfunc
-    @returns('void')
-    @locals(steps='int', step='int', action='int', time='int',
+    @locals(steps='int', step='int', action='int',
             features='int', feature='int', state_size='int',
             choices='int[:]', choice='int',
-            free0='float[:]', free1='float[:]',
-            free2='float[:]', free3='float[:]',
-            state0l0='float[:, :]', state0l1='float[:, :]',
-            state0l2='float[:, :]', state0l3='float[:, :]',
-            diffs0l0='float[:, :]', diffs0l1='float[:, :]',
-            diffs0l2='float[:, :]', diffs0l3='float[:, :]',
-            diffs1l0='float[:, :]', diffs1l1='float[:, :]',
-            diffs1l2='float[:, :]', diffs1l3='float[:, :]',
-            diffs2l0='float[:, :]', diffs2l1='float[:, :]',
-            diffs2l2='float[:, :]', diffs2l3='float[:, :]',
-            diffs3l0='float[:, :]', diffs3l1='float[:, :]',
-            diffs3l2='float[:, :]', diffs3l3='float[:, :]',
-            value0='float', value1='float', value2='float', value3='float',
+            free='float[:, :]', state0l='float[:, :, :]',
+            diffs0l='float[:, :, :]', diffs1l='float[:, :, :]',
+            diffs2l='float[:, :, :]', diffs3l='float[:, :, :]',
             state0='float*', state1='float*', state2='float*',
             state3='float*', state4='float*',
             state0f='float', state1f='float', state2f='float', state3f='float',
@@ -74,24 +62,26 @@ class Bot(BaseBot):
     def act(self, steps):
         features = self.level['features']
         state_size = features * sizeof(float)
-        free0, free1, free2, free3 = self.params['free']
-        state0l0, state0l1, state0l2, state0l3 = self.params['state0l']
-        diffs0l0, diffs0l1, diffs0l2, diffs0l3 = self.params['diffs0l']
-        diffs1l0, diffs1l1, diffs1l2, diffs1l3 = self.params['diffs1l']
-        diffs2l0, diffs2l1, diffs2l2, diffs2l3 = self.params['diffs2l']
-        diffs3l0, diffs3l1, diffs3l2, diffs3l3 = self.params['diffs3l']
-        state1, state2, state3, state4 = (self.state1, self.state2,
-                                                    self.state3, self.state4)
+        free = self.params['free']
+        state0l = self.params['state0l']
+        diffs0l = self.params['diffs0l']
+        diffs1l = self.params['diffs1l']
+        diffs2l = self.params['diffs2l']
+        diffs3l = self.params['diffs3l']
+        state1 = self.state1
+        state2 = self.state2
+        state3 = self.state3
+        state4 = self.state4
         choices = self.choices
-        time = c_get_time()
+        values = declare('float[4]')
         action = -1
 
-        for step in range(steps):
-            choice = choices[time]
-            value0 = free0[choice]
-            value1 = free1[choice]
-            value2 = free2[choice]
-            value3 = free3[choice]
+        for step in range(c_get_time(), c_get_time() + steps):
+            choice = choices[step]
+            values[0] = free[0, choice]
+            values[1] = free[1, choice]
+            values[2] = free[2, choice]
+            values[3] = free[3, choice]
             state0 = c_get_state()
             for feature in range(features):
                 state0f = state0[feature]
@@ -103,38 +93,39 @@ class Bot(BaseBot):
                 diffs2f = state0f - 3 * (state1f - state2f) - state3f
                 diffs3f = (state0f - 4 * (state1f + state3f) +
                                                 6 * state2f + state4[feature])
-                value0 += (state0l0[feature, choice] * state0f +
-                                        diffs0l0[feature, choice] * diffs0f +
-                                        diffs1l0[feature, choice] * diffs1f +
-                                        diffs2l0[feature, choice] * diffs2f +
-                                        diffs3l0[feature, choice] * diffs3f)
-                value1 += (state0l1[feature, choice] * state0f +
-                                        diffs0l1[feature, choice] * diffs0f +
-                                        diffs1l1[feature, choice] * diffs1f +
-                                        diffs2l1[feature, choice] * diffs2f +
-                                        diffs3l1[feature, choice] * diffs3f)
-                value2 += (state0l2[feature, choice] * state0f +
-                                        diffs0l2[feature, choice] * diffs0f +
-                                        diffs1l2[feature, choice] * diffs1f +
-                                        diffs2l2[feature, choice] * diffs2f +
-                                        diffs3l2[feature, choice] * diffs3f)
-                value3 += (state0l3[feature, choice] * state0f +
-                                        diffs0l3[feature, choice] * diffs0f +
-                                        diffs1l3[feature, choice] * diffs1f +
-                                        diffs2l3[feature, choice] * diffs2f +
-                                        diffs3l3[feature, choice] * diffs3f)
-            action = (((0 if value0 > value3 else 3)
-                                    if value0 > value2 else
-                                                (2 if value2 > value3 else 3))
-                                if value0 > value1 else
-                        ((1 if value1 > value3 else 3)
-                                    if value1 > value2 else
-                                                (2 if value2 > value3 else 3)))
+                values[0] += (state0l[0, feature, choice] * state0f +
+                                        diffs0l[0, feature, choice] * diffs0f +
+                                        diffs1l[0, feature, choice] * diffs1f +
+                                        diffs2l[0, feature, choice] * diffs2f +
+                                        diffs3l[0, feature, choice] * diffs3f)
+                values[1] += (state0l[1, feature, choice] * state0f +
+                                        diffs0l[1, feature, choice] * diffs0f +
+                                        diffs1l[1, feature, choice] * diffs1f +
+                                        diffs2l[1, feature, choice] * diffs2f +
+                                        diffs3l[1, feature, choice] * diffs3f)
+                values[2] += (state0l[2, feature, choice] * state0f +
+                                        diffs0l[2, feature, choice] * diffs0f +
+                                        diffs1l[2, feature, choice] * diffs1f +
+                                        diffs2l[2, feature, choice] * diffs2f +
+                                        diffs3l[2, feature, choice] * diffs3f)
+                values[3] += (state0l[3, feature, choice] * state0f +
+                                        diffs0l[3, feature, choice] * diffs0f +
+                                        diffs1l[3, feature, choice] * diffs1f +
+                                        diffs2l[3, feature, choice] * diffs2f +
+                                        diffs3l[3, feature, choice] * diffs3f)
+            action = (((0 if values[0] > values[3] else 3)
+                                if values[0] > values[2] else
+                                        (2 if values[2] > values[3] else 3))
+                                if values[0] > values[1] else
+                        ((1 if values[1] > values[3] else 3)
+                                if values[1] > values[2] else
+                                        (2 if values[2] > values[3] else 3)))
             c_do_action(action)
             state4, state3, state2, state1 = state3, state2, state1, state4
             memcpy(state1, state0, state_size)
-            time += 1
 
-        self.state1, self.state2, self.state3, self.state4 = (state1, state2,
-                                                                state3, state4)
+        self.state1 = state1
+        self.state2 = state2
+        self.state3 = state3
+        self.state4 = state4
         self.last_action = action

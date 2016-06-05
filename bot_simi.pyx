@@ -13,7 +13,7 @@ from libc.string cimport memcpy
 
 from bot_base cimport BaseBot
 
-from interface cimport c_do_action, c_get_score, c_get_state
+from interface cimport c_do_action, c_get_score, c_get_state, c_get_time
 
 
 @cclass
@@ -30,24 +30,24 @@ class Bot(BaseBot):
         free(self.scores)
         free(self.actions)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.params['lookback'] = 100
+        self.params['threshold'] = .01
+
     @cfunc
     @returns('Bot')
-    @locals(state='bint', bot='Bot', features='int', steps='int')
+    @locals(state='bint', bot='Bot')
     def clone(self, state=True):
         bot = BaseBot.clone(self, state)
         if state:
-            features = self.level['features']
-            steps = self.level['steps']
-            memcpy(bot.states, self.states, steps * features * sizeof(float))
-            memcpy(bot.scores, self.scores, steps * sizeof(float))
-            memcpy(bot.actions, self.actions, steps * sizeof(int))
+            memcpy(bot.states, self.states, self.level['steps'] *
+                                        self.level['features'] * sizeof(float))
+            memcpy(bot.scores, self.scores, self.level['steps'] *
+                                                                sizeof(float))
+            memcpy(bot.actions, self.actions, self.level['steps'] *
+                                                                sizeof(int))
         return bot
-
-    @cfunc
-    @returns('dict')
-    @locals(dists='dict', emphases='tuple')
-    def new_params(self, dists, emphases):
-        return {'lookback': 100, 'threshold': 0}
 
     @cfunc
     @returns('void')
@@ -71,14 +71,16 @@ class Bot(BaseBot):
         states = self.states
         scores = self.scores
         actions = self.actions
-        score = c_get_score()
         values = declare('float[4]')
         action = -1
 
-        for step in range(steps):
+        for step in range(c_get_time(), c_get_time() + steps):
             state = c_get_state()
+            memcpy(address(states[step * features]), state, state_size)
+            score = c_get_score()
+            scores[step] = c_get_score()
             values[0] = values[1] = values[2] = values[3] = 0
-            for pstep in range(max(0, step - lookback), step - 1):
+            for pstep in range(max(0, step - lookback), step):
                 dissimi = 0
                 pstate = address(states[pstep * features])
                 for feature in range(features):
@@ -90,16 +92,13 @@ class Bot(BaseBot):
             action = (((0 if values[0] > values[3] else 3)
                                 if values[0] > values[2] else
                                         (2 if values[2] > values[3] else 3))
-                            if values[0] > values[1] else
+                                if values[0] > values[1] else
                         ((1 if values[1] > values[3] else 3)
                                 if values[1] > values[2] else
                                         (2 if values[2] > values[3] else 3)))
             if values[action] < threshold:
                 action = rand() % 4
             c_do_action(action)
-            score = c_get_score()
-            memcpy(address(states[step * features]), state, state_size)
             actions[step] = action
-            scores[step] = score
 
         self.last_action = action

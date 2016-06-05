@@ -24,28 +24,15 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature0='int', feature1='int',
-            free='float[:]',
-            free0='float', free1='float', free2='float', free3='float',
-            state0l='float[:, :]',
-            state0l0='float[:]', state0l1='float[:]',
-            state0l2='float[:]', state0l3='float[:]',
-            state0q='float[:, :, :]',
+            free='float[4]', state0l='float[:, :]', state0q='float[:, :, :]',
             state0q0='float[:, :]', state0q1='float[:, :]',
             state0q2='float[:, :]', state0q3='float[:, :]',
-            value0='float', value1='float', value2='float', value3='float',
+            values='float[4]',
             state0='float*', state0f0='float', state0f01='float')
     def act(self, steps):
         features = self.level['features']
         free = self.params['free']
-        free0 = free[0]
-        free1 = free[1]
-        free2 = free[2]
-        free3 = free[3]
         state0l = self.params['state0l']
-        state0l0 = state0l[0]
-        state0l1 = state0l[1]
-        state0l2 = state0l[2]
-        state0l3 = state0l[3]
         state0q = self.params['state0q']
         state0q0 = state0q[0]
         state0q1 = state0q[1]
@@ -54,30 +41,27 @@ class Bot(BaseBot):
         action = -1
 
         for step in range(steps):
-            value0 = free0
-            value1 = free1
-            value2 = free2
-            value3 = free3
+            values = free[:]
             state0 = c_get_state()
             for feature0 in range(features):
                 state0f0 = state0[feature0]
-                value0 += state0l0[feature0] * state0f0
-                value1 += state0l1[feature0] * state0f0
-                value2 += state0l2[feature0] * state0f0
-                value3 += state0l3[feature0] * state0f0
+                values[0] += state0l[0, feature0] * state0f0
+                values[1] += state0l[1, feature0] * state0f0
+                values[2] += state0l[2, feature0] * state0f0
+                values[3] += state0l[3, feature0] * state0f0
                 for feature1 in range(features):
-                    state0f01 = state0[feature0] * state0[feature1]
-                    value0 += state0q0[feature0, feature1] * state0f01
-                    value1 += state0q1[feature0, feature1] * state0f01
-                    value2 += state0q2[feature0, feature1] * state0f01
-                    value3 += state0q3[feature0, feature1] * state0f01
-            action = (((0 if value0 > value3 else 3)
-                                    if value0 > value2 else
-                                                (2 if value2 > value3 else 3))
-                                if value0 > value1 else
-                        ((1 if value1 > value3 else 3)
-                                    if value1 > value2 else
-                                                (2 if value2 > value3 else 3)))
+                    state0f01 = state0f0 * state0[feature1]
+                    values[0] += state0q0[feature0, feature1] * state0f01
+                    values[1] += state0q1[feature0, feature1] * state0f01
+                    values[2] += state0q2[feature0, feature1] * state0f01
+                    values[3] += state0q3[feature0, feature1] * state0f01
+            action = (((0 if values[0] > values[3] else 3)
+                                if values[0] > values[2] else
+                                        (2 if values[2] > values[3] else 3))
+                                if values[0] > values[1] else
+                        ((1 if values[1] > values[3] else 3)
+                                if values[1] > values[2] else
+                                        (2 if values[2] > values[3] else 3)))
             c_do_action(action)
 
         self.last_action = action

@@ -1,8 +1,8 @@
 """
 Makes sequences of 5 steps randomly, with a set of probabilities for each step.
 
-Assumes 4 actions. Cannot make less than 5 steps at a time. Used to be 10-15%
-faster than the N implementation, but doesn't seem to be any longer.
+Assumes 4 actions. Cannot make less than 5 steps at a time.
+Some 5% faster than the N implementation.
 """
 from cython import cast, cclass, cfunc, locals, returns
 from libc.stdlib cimport rand, RAND_MAX
@@ -42,107 +42,96 @@ class Bot(BaseBot):
         prob += change * (dists['unit'].rvs() - prob)
         min_prob = 0 if action == 0 else probs[step][action - 1]
         max_prob = 1 if action == actions - 2 else probs[step][action + 1]
-        probs[step][action] = (min_prob if prob < min_prob else
+        probs[step, action] = (min_prob if prob < min_prob else
                                     (max_prob if prob > max_prob else prob))
 
     @cfunc
     @returns('void')
-    @locals(steps='int', step='int', action='int', rest='int',
-            probs='float[:, :]',
-            prob00='float', prob01='float', prob02='float',
-            prob10='float', prob11='float', prob12='float',
-            prob20='float', prob21='float', prob22='float',
-            prob30='float', prob31='float', prob32='float',
-            prob40='float', prob41='float', prob42='float',
-            random='float')
+    @locals(steps='int', step='int', action='int', remainder='int',
+            probs='float[5][3]', random='float')
     def act(self, steps):
         assert steps >= 5
         probs = self.params['probs']
-        prob00, prob01, prob02 = probs[0]
-        prob10, prob11, prob12 = probs[1]
-        prob20, prob21, prob22 = probs[2]
-        prob30, prob31, prob32 = probs[3]
-        prob40, prob41, prob42 = probs[4]
-        rest = c_get_time() % 5
+        remainder = c_get_time() % 5
         action = -1
 
-        if rest != 0:
-            if rest != 4:
-                if rest != 3:
-                    if rest != 2:
+        if remainder != 0:
+            if remainder != 4:
+                if remainder != 3:
+                    if remainder != 2:
                         random = cast('float', rand() / RAND_MAX)
-                        action = ((0 if random < prob10 else 1)
-                                            if random < prob11 else
-                                                (2 if random < prob12 else 3))
+                        action = ((0 if random < probs[1][0] else 1)
+                                        if random < probs[1][1] else
+                                            (2 if random < probs[1][2] else 3))
                         c_do_action(action)
                     random = cast('float', rand() / RAND_MAX)
-                    action = ((0 if random < prob20 else 1)
-                                        if random < prob21 else
-                                                (2 if random < prob22 else 3))
+                    action = ((0 if random < probs[2][0] else 1)
+                                    if random < probs[2][1] else
+                                        (2 if random < probs[2][2] else 3))
                     c_do_action(action)
                 random = cast('float', rand() / RAND_MAX)
-                action = ((0 if random < prob30 else 1)
-                                    if random < prob31 else
-                                            (2 if random < prob32 else 3))
+                action = ((0 if random < probs[3][0] else 1)
+                                if random < probs[3][1] else
+                                    (2 if random < probs[3][2] else 3))
                 c_do_action(action)
             random = cast('float', rand() / RAND_MAX)
-            action = ((0 if random < prob40 else 1)
-                                if random < prob41 else
-                                        (2 if random < prob42 else 3))
+            action = ((0 if random < probs[4][0] else 1)
+                            if random < probs[4][1] else
+                                (2 if random < probs[4][2] else 3))
             c_do_action(action)
 
-        steps, rest = divmod(steps - rest, 5)
+        steps, remainder = divmod(steps - remainder, 5)
 
         for step in range(steps):
             random = cast('float', rand() / RAND_MAX)
-            action = ((0 if random < prob00 else 1)
-                                if random < prob01 else
-                                        (2 if random < prob02 else 3))
+            action = ((0 if random < probs[0][0] else 1)
+                            if random < probs[0][1] else
+                                (2 if random < probs[0][2] else 3))
             c_do_action(action)
             random = cast('float', rand() / RAND_MAX)
-            action = ((0 if random < prob10 else 1)
-                                if random < prob11 else
-                                        (2 if random < prob12 else 3))
+            action = ((0 if random < probs[1][0] else 1)
+                            if random < probs[1][1] else
+                                (2 if random < probs[1][2] else 3))
             c_do_action(action)
             random = cast('float', rand() / RAND_MAX)
-            action = ((0 if random < prob20 else 1)
-                                if random < prob21 else
-                                        (2 if random < prob22 else 3))
+            action = ((0 if random < probs[2][0] else 1)
+                            if random < probs[2][1] else
+                                (2 if random < probs[2][2] else 3))
             c_do_action(action)
             random = cast('float', rand() / RAND_MAX)
-            action = ((0 if random < prob30 else 1)
-                                if random < prob31 else
-                                        (2 if random < prob32 else 3))
+            action = ((0 if random < probs[3][0] else 1)
+                            if random < probs[3][1] else
+                                (2 if random < probs[3][2] else 3))
             c_do_action(action)
             random = cast('float', rand() / RAND_MAX)
-            action = ((0 if random < prob40 else 1)
-                                if random < prob41 else
-                                        (2 if random < prob42 else 3))
+            action = ((0 if random < probs[4][0] else 1)
+                            if random < probs[4][1] else
+                                (2 if random < probs[4][2] else 3))
             c_do_action(action)
 
-        if rest > 0:
+        if remainder > 0:
             random = cast('float', rand() / RAND_MAX)
-            action = ((0 if random < prob00 else 1)
-                                if random < prob01 else
-                                        (2 if random < prob02 else 3))
+            action = ((0 if random < probs[0][0] else 1)
+                            if random < probs[0][1] else
+                                (2 if random < probs[0][2] else 3))
             c_do_action(action)
-            if rest > 1:
+            if remainder > 1:
                 random = cast('float', rand() / RAND_MAX)
-                action = ((0 if random < prob10 else 1)
-                                    if random < prob11 else
-                                            (2 if random < prob12 else 3))
+                action = ((0 if random < probs[1][0] else 1)
+                                if random < probs[1][1] else
+                                    (2 if random < probs[1][2] else 3))
                 c_do_action(action)
-                if rest > 2:
+                if remainder > 2:
                     random = cast('float', rand() / RAND_MAX)
-                    action = ((0 if random < prob20 else 1)
-                                        if random < prob21 else
-                                                (2 if random < prob22 else 3))
+                    action = ((0 if random < probs[2][0] else 1)
+                                    if random < probs[2][1] else
+                                        (2 if random < probs[2][2] else 3))
                     c_do_action(action)
-                    if rest > 3:
+                    if remainder > 3:
                         random = cast('float', rand() / RAND_MAX)
-                        action = ((0 if random < prob30 else 1)
-                                            if random < prob31 else
-                                                (2 if random < prob32 else 3))
+                        action = ((0 if random < probs[3][0] else 1)
+                                        if random < probs[3][1] else
+                                            (2 if random < probs[3][2] else 3))
                         c_do_action(action)
 
         self.last_action = action

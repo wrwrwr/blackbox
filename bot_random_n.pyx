@@ -43,24 +43,23 @@ class Bot(BaseBot):
         prob += change * (dists['unit'].rvs() - prob)
         min_prob = 0 if action == 0 else probs[step][action - 1]
         max_prob = 1 if action == actions - 2 else probs[step][action + 1]
-        probs[step][action] = (min_prob if prob < min_prob else
+        probs[step, action] = (min_prob if prob < min_prob else
                                     (max_prob if prob > max_prob else prob))
 
     @cfunc
     @returns('void')
-    @locals(steps='int', step='int', action='int', time='int', rest='int',
+    @locals(steps='int', step='int', action='int', remainder='int',
             probs='float[:, :]', random='float')
     def act(self, steps):
         probs = self.params['probs']
-        time = c_get_time()
         action = -1
 
-        for step in range(time, time + steps):
-            rest = step % n
+        for step in range(c_get_time(), c_get_time() + steps):
+            remainder = step % n
             random = cast('float', rand() / RAND_MAX)
-            action = ((0 if random < probs[rest, 0] else 1)
-                                if random < probs[rest, 1] else
-                                        (2 if random < probs[rest, 2] else 3))
+            action = ((0 if random < probs[remainder, 0] else 1)
+                            if random < probs[remainder, 1] else
+                                (2 if random < probs[remainder, 2] else 3))
             c_do_action(action)
 
         self.last_action = action

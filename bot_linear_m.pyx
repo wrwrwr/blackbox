@@ -18,7 +18,7 @@ class Bot(BaseBot):
 
     @cfunc
     @returns('void')
-    @locals(steps='int', step='int', action='int', time='int',
+    @locals(steps='int', step='int', action='int',
             features='int', feature='int', choices='int[:]', choice='int',
             free='float[:, :]', state0l='float[:, :, :]',
             state0='float*', state0f='float')
@@ -27,12 +27,11 @@ class Bot(BaseBot):
         free = self.params['free']
         state0l = self.params['state0l']
         choices = self.choices
-        time = c_get_time()
         values = declare('float[4]')
         action = -1
 
-        for step in range(steps):
-            choice = choices[time]
+        for step in range(c_get_time(), c_get_time() + steps):
+            choice = choices[step]
             values[0] = free[0, choice]
             values[1] = free[1, choice]
             values[2] = free[2, choice]
@@ -52,6 +51,5 @@ class Bot(BaseBot):
                                 if values[1] > values[2] else
                                         (2 if values[2] > values[3] else 3)))
             c_do_action(action)
-            time += 1
 
         self.last_action = action
