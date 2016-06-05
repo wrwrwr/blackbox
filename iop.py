@@ -194,6 +194,9 @@ def load_params(bot, key, verbosity):
     if '_phases' in params:
         params['_phases'] = array(params['_phases'])
 
+    for key in params:
+        params[key.replace('constant', 'free')] = params.pop(key)
+
     return key, params, history
 
 

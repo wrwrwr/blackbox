@@ -1,8 +1,8 @@
 """
 Double-state linear regression.
 
-Multiplies each component of the state and the previous state by a weight and
-chooses the action for which the sum plus a constant factor is the biggest.
+Sums weighted components of the state and the previous state and chooses the
+action for which the sum plus a free factor is the biggest.
 
 Assumes 4 actions.
 """
@@ -19,7 +19,7 @@ from interface cimport c_do_action, c_get_state
 class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
-            'constant': (level['actions'],),
+            'free': (level['actions'],),
             'state0l': (level['actions'], level['features']),
             'state1l': (level['actions'], level['features'])
         }
@@ -42,8 +42,8 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int', state_size='int',
-            constant0='float', constant1='float',
-            constant2='float', constant3='float',
+            free0='float', free1='float',
+            free2='float', free3='float',
             state0l0='float[:]', state0l1='float[:]',
             state0l2='float[:]', state0l3='float[:]',
             state1l0='float[:]', state1l1='float[:]',
@@ -53,17 +53,17 @@ class Bot(BaseBot):
     def act(self, steps):
         features = self.level['features']
         state_size = features * sizeof(float)
-        constant0, constant1, constant2, constant3 = self.params['constant']
+        free0, free1, free2, free3 = self.params['free']
         state0l0, state0l1, state0l2, state0l3 = self.params['state0l']
         state1l0, state1l1, state1l2, state1l3 = self.params['state1l']
         state1 = self.state1
         action = -1
 
         for step in range(steps):
-            value0 = constant0
-            value1 = constant1
-            value2 = constant2
-            value3 = constant3
+            value0 = free0
+            value1 = free1
+            value2 = free2
+            value3 = free3
             state0 = c_get_state()
             for feature in range(features):
                 state0f = state0[feature]

@@ -15,7 +15,7 @@ from interface cimport c_do_action, c_get_state
 class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
-            'constant': (level['actions'],),
+            'free': (level['actions'],),
             'state0l': (level['actions'], level['features']),
             'state0q': (level['actions'], level['features'], level['features'])
         }
@@ -24,9 +24,8 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature0='int', feature1='int',
-            constant='float[:]',
-            constant0='float', constant1='float',
-            constant2='float', constant3='float',
+            free='float[:]',
+            free0='float', free1='float', free2='float', free3='float',
             state0l='float[:, :]',
             state0l0='float[:]', state0l1='float[:]',
             state0l2='float[:]', state0l3='float[:]',
@@ -37,11 +36,11 @@ class Bot(BaseBot):
             state0='float*', state0f0='float', state0f01='float')
     def act(self, steps):
         features = self.level['features']
-        constant = self.params['constant']
-        constant0 = constant[0]
-        constant1 = constant[1]
-        constant2 = constant[2]
-        constant3 = constant[3]
+        free = self.params['free']
+        free0 = free[0]
+        free1 = free[1]
+        free2 = free[2]
+        free3 = free[3]
         state0l = self.params['state0l']
         state0l0 = state0l[0]
         state0l1 = state0l[1]
@@ -55,10 +54,10 @@ class Bot(BaseBot):
         action = -1
 
         for step in range(steps):
-            value0 = constant0
-            value1 = constant1
-            value2 = constant2
-            value3 = constant3
+            value0 = free0
+            value1 = free1
+            value2 = free2
+            value3 = free3
             state0 = c_get_state()
             for feature0 in range(features):
                 state0f0 = state0[feature0]

@@ -12,7 +12,7 @@ from interface cimport c_do_action, c_get_state, c_get_time
 class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
-            'constant': (level['actions'],),
+            'free': (level['actions'],),
             'state0l': (level['actions'], level['features'])
         }
 
@@ -20,11 +20,11 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int', time='int',
             features='int', feature='int', choices='int[:]', choice='int',
-            constant='float[:, :]', state0l='float[:, :, :]',
+            free='float[:, :]', state0l='float[:, :, :]',
             state0='float*', state0f='float')
     def act(self, steps):
         features = self.level['features']
-        constant = self.params['constant']
+        free = self.params['free']
         state0l = self.params['state0l']
         choices = self.choices
         time = c_get_time()
@@ -33,10 +33,10 @@ class Bot(BaseBot):
 
         for step in range(steps):
             choice = choices[time]
-            values[0] = constant[0, choice]
-            values[1] = constant[1, choice]
-            values[2] = constant[2, choice]
-            values[3] = constant[3, choice]
+            values[0] = free[0, choice]
+            values[1] = free[1, choice]
+            values[2] = free[2, choice]
+            values[3] = free[3, choice]
             state0 = c_get_state()
             for feature in range(features):
                 state0f = state0[feature]

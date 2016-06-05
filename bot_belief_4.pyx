@@ -14,10 +14,10 @@ from interface cimport c_do_action, c_get_state
 class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
-            'constant': (level['actions'],),
+            'free': (level['actions'],),
             'state0l': (level['actions'], level['features']),
             'belief0l': (level['actions'], 4),
-            'belief_constant': (4,),
+            'belief_free': (4,),
             'belief_state0l': (4, level['features']),
             'belief_belief0l': (4, 4)
         }
@@ -53,25 +53,24 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int',
-            constant='float[4]', state0l='float[:, :]', belief0l='float[:, :]',
-            belief_constant='float[4]',
-            belief_state0l='float[:, :]',
+            free='float[4]', state0l='float[:, :]', belief0l='float[:, :]',
+            belief_free='float[4]', belief_state0l='float[:, :]',
             belief_belief0l='float[:, :]',
             beliefs='float[4]', beliefst='float[4]', values='float[4]',
             state0='float*', state0f='float')
     def act(self, steps):
         features = self.level['features']
-        constant = self.params['constant']
+        free = self.params['free']
         state0l = self.params['state0l']
         belief0l = self.params['belief0l']
-        belief_constant = self.params['belief_constant']
+        belief_free = self.params['belief_free']
         belief_state0l = self.params['belief_state0l']
         belief_belief0l = self.params['belief_belief0l']
         beliefs = self.beliefs[:]
         action = -1
 
         for step in range(steps):
-            values = constant[:]
+            values = free[:]
             values[0] += (belief0l[0, 0] * beliefs[0] +
                           belief0l[0, 1] * beliefs[1] +
                           belief0l[0, 2] * beliefs[2] +
@@ -103,7 +102,7 @@ class Bot(BaseBot):
                                 if values[1] > values[2] else
                                         (2 if values[2] > values[3] else 3)))
             c_do_action(action)
-            beliefst = belief_constant[:]
+            beliefst = belief_free[:]
             beliefst[0] += (belief_belief0l[0, 0] * beliefs[0] +
                             belief_belief0l[0, 1] * beliefs[1] +
                             belief_belief0l[0, 2] * beliefs[2] +

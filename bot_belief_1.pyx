@@ -24,10 +24,10 @@ from interface cimport c_do_action, c_get_state
 class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
-            'constant': (level['actions'],),
+            'free': (level['actions'],),
             'state0l': (level['actions'], level['features']),
             'belief0l': (level['actions'],),
-            'belief_constant': (1,),
+            'belief_free': (1,),
             'belief_state0l': (level['features'],),
             'belief_belief0l': (1,)
         }
@@ -65,23 +65,23 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int',
-            constant='float[4]', state0l='float[:, :]', belief0l='float[4]',
-            belief_constant='float', belief_state0l='float[:]',
+            free='float[4]', state0l='float[:, :]', belief0l='float[4]',
+            belief_free='float', belief_state0l='float[:]',
             belief_belief0l='float', belief='float',
             values='float[4]', state0='float*', state0f='float')
     def act(self, steps):
         features = self.level['features']
-        constant = self.params['constant']
+        free = self.params['free']
         state0l = self.params['state0l']
         belief0l = self.params['belief0l']
-        belief_constant = self.params['belief_constant']
+        belief_free = self.params['belief_free']
         belief_state0l = self.params['belief_state0l']
         belief_belief0l = self.params['belief_belief0l']
         belief = self.belief
         action = -1
 
         for step in range(steps):
-            values = constant[:]
+            values = free[:]
             values[0] += belief0l[0] * belief
             values[1] += belief0l[1] * belief
             values[2] += belief0l[2] * belief
@@ -101,7 +101,7 @@ class Bot(BaseBot):
                                 if values[1] > values[2] else
                                         (2 if values[2] > values[3] else 3)))
             c_do_action(action)
-            belief = belief_constant + belief_belief0l * belief
+            belief = belief_free + belief_belief0l * belief
             for feature in range(features):
                 belief += belief_state0l[feature] * state0[feature]
 

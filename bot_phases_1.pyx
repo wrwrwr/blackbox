@@ -22,8 +22,8 @@ from interface cimport c_do_action, c_get_state, c_get_time
 class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
-            'constantp0': (level['actions'],),
-            'constantp1': (level['actions'],),
+            'freep0': (level['actions'],),
+            'freep1': (level['actions'],),
             'state0p0l': (level['actions'], level['features']),
             'state0p1l': (level['actions'], level['features'])
         }
@@ -36,9 +36,9 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int', time='int', phase1='int',
             features='int', feature='int',
-            constant='float[:]', state0l='float[:, :]',
-            constant0='float', constant1='float',
-            constant2='float', constant3='float',
+            free='float[:]', state0l='float[:, :]',
+            free0='float', free1='float',
+            free2='float', free3='float',
             state0l0='float[:]', state0l1='float[:]',
             state0l2='float[:]', state0l3='float[:]',
             value0='float', value1='float', value2='float', value3='float',
@@ -50,20 +50,20 @@ class Bot(BaseBot):
         action = -1
 
         if time < phase1:
-            constant = self.params['constantp0']
+            free = self.params['freep0']
             state0l = self.params['state0p0l']
         else:
-            constant = self.params['constantp1']
+            free = self.params['freep1']
             state0l = self.params['state0p1l']
 
-        constant0, constant1, constant2, constant3 = constant
+        free0, free1, free2, free3 = free
         state0l0, state0l1, state0l2, state0l3 = state0l
 
         for step in range(steps):
-            value0 = constant0
-            value1 = constant1
-            value2 = constant2
-            value3 = constant3
+            value0 = free0
+            value1 = free1
+            value2 = free2
+            value3 = free3
             state0 = c_get_state()
             for feature in range(features):
                 state0f = state0[feature]
@@ -81,9 +81,9 @@ class Bot(BaseBot):
             c_do_action(action)
             time += 1
             if time == phase1:
-                constant = self.params['constantp1']
+                free = self.params['freep1']
                 state0l = self.params['state0p1l']
-                constant0, constant1, constant2, constant3 = constant
+                free0, free1, free2, free3 = free
                 state0l0, state0l1, state0l2, state0l3 = state0l
 
         self.last_action = action

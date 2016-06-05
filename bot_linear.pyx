@@ -1,6 +1,7 @@
 """
-Multiplies each component of the state by a weight and chooses the action
-for which the sum plus a constant factor is the biggest.
+Sums weighted components of the state and adds a free factor, with a different
+vector of weights and factor for each action, then chooses the action for which
+the sum is the biggest.
 
 Assumes 4 actions.
 """
@@ -15,7 +16,7 @@ from interface cimport c_do_action, c_get_state
 class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
-            'constant': (level['actions'],),
+            'free': (level['actions'],),
             'state0l': (level['actions'], level['features'])
         }
 
@@ -23,16 +24,16 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int',
-            constant='float[4]', state0l='float[:, :]',
+            free='float[4]', state0l='float[:, :]',
             values='float[4]', state0='float*', state0f='float')
     def act(self, steps):
         features = self.level['features']
-        constant = self.params['constant']
+        free = self.params['free']
         state0l = self.params['state0l']
         action = -1
 
         for step in range(steps):
-            values = constant[:]
+            values = free[:]
             state0 = c_get_state()
             for feature in range(features):
                 state0f = state0[feature]

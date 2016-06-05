@@ -16,7 +16,7 @@ from interface cimport c_do_action, c_get_state, c_get_time
 class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
-            'constant': (level['actions'],),
+            'free': (level['actions'],),
             'state0l': (level['actions'], level['features']),
             'diffs0l': (level['actions'], level['features']),
             'diffs1l': (level['actions'], level['features']),
@@ -54,8 +54,8 @@ class Bot(BaseBot):
     @locals(steps='int', step='int', action='int', time='int',
             features='int', feature='int', state_size='int',
             choices='int[:]', choice='int',
-            constant0='float[:]', constant1='float[:]',
-            constant2='float[:]', constant3='float[:]',
+            free0='float[:]', free1='float[:]',
+            free2='float[:]', free3='float[:]',
             state0l0='float[:, :]', state0l1='float[:, :]',
             state0l2='float[:, :]', state0l3='float[:, :]',
             diffs0l0='float[:, :]', diffs0l1='float[:, :]',
@@ -74,7 +74,7 @@ class Bot(BaseBot):
     def act(self, steps):
         features = self.level['features']
         state_size = features * sizeof(float)
-        constant0, constant1, constant2, constant3 = self.params['constant']
+        free0, free1, free2, free3 = self.params['free']
         state0l0, state0l1, state0l2, state0l3 = self.params['state0l']
         diffs0l0, diffs0l1, diffs0l2, diffs0l3 = self.params['diffs0l']
         diffs1l0, diffs1l1, diffs1l2, diffs1l3 = self.params['diffs1l']
@@ -88,10 +88,10 @@ class Bot(BaseBot):
 
         for step in range(steps):
             choice = choices[time]
-            value0 = constant0[choice]
-            value1 = constant1[choice]
-            value2 = constant2[choice]
-            value3 = constant3[choice]
+            value0 = free0[choice]
+            value1 = free1[choice]
+            value2 = free2[choice]
+            value3 = free3[choice]
             state0 = c_get_state()
             for feature in range(features):
                 state0f = state0[feature]

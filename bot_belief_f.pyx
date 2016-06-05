@@ -16,10 +16,10 @@ from interface cimport c_do_action, c_get_state
 class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {
-            'constant': (level['actions'],),
+            'free': (level['actions'],),
             'state0l': (level['actions'], level['features']),
             'belief0l': (level['actions'], level['features']),
-            'belief_constant': (level['features'],),
+            'belief_free': (level['features'],),
             'belief_state0l': (level['features'], level['features']),
             'belief_belief0l': (level['features'], level['features'])
         }
@@ -64,19 +64,18 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int', featureb='int',
-            constant='float[4]', state0l='float[:, :]', belief0l='float[:, :]',
-            belief_constant='float[:]',
-            belief_state0l='float[:, :]',
+            free='float[4]', state0l='float[:, :]', belief0l='float[:, :]',
+            belief_free='float[:]', belief_state0l='float[:, :]',
             belief_belief0l='float[:, :]',
             beliefs0='float*', beliefs0t='float*',
             values='float[4]', state0='float*', state0f='float',
             beliefs0f='float', belieft='float')
     def act(self, steps):
         features = self.level['features']
-        constant = self.params['constant']
+        free = self.params['free']
         state0l = self.params['state0l']
         belief0l = self.params['belief0l']
-        belief_constant = self.params['belief_constant']
+        belief_free = self.params['belief_free']
         belief_state0l = self.params['belief_state0l']
         belief_belief0l = self.params['belief_belief0l']
         beliefs0 = self.beliefs0
@@ -84,7 +83,7 @@ class Bot(BaseBot):
         action = -1
 
         for step in range(steps):
-            values = constant[:]
+            values = free[:]
             state0 = c_get_state()
             for feature in range(features):
                 state0f = state0[feature]
@@ -106,7 +105,7 @@ class Bot(BaseBot):
                                         (2 if values[2] > values[3] else 3)))
             c_do_action(action)
             for featureb in range(features):
-                belieft = belief_constant[featureb]
+                belieft = belief_free[featureb]
                 for feature in range(features):
                     belieft += (
                         belief_state0l[featureb, feature] * state0[feature] +
