@@ -3,5 +3,5 @@ cdef class BaseProcessor:
         tuple data
         int max_features, max_actions, max_steps
 
-    cpdef object results(self, tuple)
+    cpdef tuple results(self, tuple)
     cpdef object process(self)

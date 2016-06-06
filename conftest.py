@@ -1,6 +1,11 @@
 """
-Monkey-patch pycodestyle, to let it process cimports as imports.
+Monkey-patch pycodestyle, to let it process cimports as imports, and allow
+using odict (lowercase) as an alias for collections.OrderedDict.
 """
+
+
+def replace(line):
+    return line.replace('cimport', 'import').replace('odict', 'ODict')
 
 
 def patch_checker(checker_class):
@@ -8,7 +13,7 @@ def patch_checker(checker_class):
 
     def checker_init(self, *args, **kwargs):
         old_checker_init(self, *args, **kwargs)
-        self.lines = [l.replace('cimport', 'import') for l in self.lines]
+        self.lines = list(map(replace, self.lines))
 
     checker_class.__init__ = checker_init
 

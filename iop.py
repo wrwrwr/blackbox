@@ -405,7 +405,7 @@ def results_desc(results, verbosity, precision):
     """
     with printoptions(precision=precision, suppress=True):
         desc = ""
-        for key, value in results.items():
+        for key, value in results:
             value = str(value)
             if verbosity > 0:
                 value = indent(value, "    ")

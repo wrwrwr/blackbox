@@ -1,5 +1,3 @@
-from collections import OrderedDict as odict
-
 from cython import ccall, cclass, locals, returns
 
 
@@ -27,7 +25,7 @@ class BaseProcessor:
         self.max_steps = max(m['level']['steps'] for _, m in self.data)
 
     @ccall
-    @returns('object')
+    @returns('tuple')
     @locals(entries='tuple')
     def results(self, entries):
         """
@@ -36,11 +34,9 @@ class BaseProcessor:
         # WA: Cython's compiler crashes if the following are generators.
         bots = ["{} {}".format(*m['bot']) for _, m in self.data]
         levels = [m['level']['key'] for _, m in self.data]
-        info = odict((
-            ("bots", ", ".join(bots)),
-            ("levels", ", ".join(levels))))
-        info.update(entries)
-        return info
+        return (("bots", ", ".join(bots)),
+                ("levels", ", ".join(levels)),
+                *entries)
 
     @ccall
     @returns('object')
