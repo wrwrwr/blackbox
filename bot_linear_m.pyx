@@ -1,7 +1,7 @@
 """
 Linear with support for multi-value parameter sets.
 """
-from cython import cclass, cfunc, declare, locals, returns
+from cython import ccall, cclass, declare, locals, returns
 
 from bot_base cimport BaseBot
 
@@ -16,7 +16,7 @@ class Bot(BaseBot):
             'state0l': (level['actions'], level['features'])
         }
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int', choices='int[:]', choice='int',

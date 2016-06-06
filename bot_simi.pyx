@@ -5,7 +5,7 @@ rewards for the same action.
 
 Assumes 4 actions.
 """
-from cython import (address, cast, cclass, cfunc, declare, locals, returns,
+from cython import (address, cast, ccall, cclass, declare, locals, returns,
                     sizeof)
 from libc.math cimport sqrt
 from libc.stdlib cimport free, malloc, rand
@@ -35,7 +35,7 @@ class Bot(BaseBot):
         self.params['lookback'] = 100
         self.params['threshold'] = .01
 
-    @cfunc
+    @ccall
     @returns('Bot')
     @locals(state='bint', bot='Bot')
     def clone(self, state=True):
@@ -49,13 +49,13 @@ class Bot(BaseBot):
                                                                 sizeof(int))
         return bot
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(dists='dict', emphases='tuple', change='float')
     def vary_param(self, dists, emphases, change):
         raise NotImplementedError()
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', pstep='int', action='int',
             features='int', feature='int', state_size='int',

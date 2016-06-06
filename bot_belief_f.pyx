@@ -3,7 +3,7 @@ Holds a belief for a hidden state, of the same length as the visible state.
 
 Assumes 4 actions.
 """
-from cython import cast, cclass, cfunc, locals, returns, sizeof
+from cython import cast, ccall, cclass, locals, returns, sizeof
 from libc.stdlib cimport calloc, free
 from libc.string cimport memcpy
 
@@ -32,7 +32,7 @@ class Bot(BaseBot):
         free(self.beliefs0t)
         free(self.beliefs0)
 
-    @cfunc
+    @ccall
     @returns('Bot')
     @locals(state='bint', bot='Bot', beliefs_size='int')
     def clone(self, state=True):
@@ -43,7 +43,7 @@ class Bot(BaseBot):
             memcpy(bot.beliefs0t, self.beliefs0t, beliefs_size)
         return bot
 
-    @cfunc
+    @ccall
     @returns('dict')
     @locals(dists='dict', emphases='tuple',
             belief_trust='float', belief_lag='float',
@@ -60,7 +60,7 @@ class Bot(BaseBot):
         params['_belief_lag'] = belief_lag
         return params
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int', featureb='int',

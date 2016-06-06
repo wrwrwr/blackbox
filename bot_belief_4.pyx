@@ -3,7 +3,7 @@ Holds a belief for 4 float values.
 
 Assumes 4 actions.
 """
-from cython import cclass, cfunc, locals, returns
+from cython import ccall, cclass, locals, returns
 
 from bot_base cimport BaseBot
 
@@ -23,7 +23,7 @@ class Bot(BaseBot):
         }
         self.beliefs = [0] * 4
 
-    @cfunc
+    @ccall
     @returns('Bot')
     @locals(state='bint', bot='Bot')
     def clone(self, state=True):
@@ -32,7 +32,7 @@ class Bot(BaseBot):
             bot.beliefs = self.beliefs[:]
         return bot
 
-    @cfunc
+    @ccall
     @returns('dict')
     @locals(dists='dict', emphases='tuple',
             belief_trust='float', belief_lag='float',
@@ -49,7 +49,7 @@ class Bot(BaseBot):
         params['_belief_lag'] = belief_lag
         return params
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int',

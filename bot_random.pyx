@@ -5,7 +5,7 @@ This is the default bot used by collectors. The probabilities are only almost
 equal due to a slight random-number generation bias (with correctness given up
 for speed).
 """
-from cython import cclass, cfunc, locals, returns
+from cython import ccall, cclass, locals, returns
 from libc.stdlib cimport rand
 
 from bot_base cimport BaseBot
@@ -18,7 +18,7 @@ class Bot(BaseBot):
     def __cinit__(self, level, *args, **kwargs):
         self.param_shapes = {}
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', actions='int', action='int')
     def act(self, steps):

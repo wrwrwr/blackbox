@@ -13,7 +13,7 @@ weakens the impact of the belief on action evaluation. Both are drawn from the
 
 Assumes 4 actions.
 """
-from cython import cclass, cfunc, locals, returns
+from cython import ccall, cclass, locals, returns
 
 from bot_base cimport BaseBot
 
@@ -33,7 +33,7 @@ class Bot(BaseBot):
         }
         self.belief = 0
 
-    @cfunc
+    @ccall
     @returns('Bot')
     @locals(state='bint', bot='Bot')
     def clone(self, state=True):
@@ -44,7 +44,7 @@ class Bot(BaseBot):
             bot.belief = 0
         return bot
 
-    @cfunc
+    @ccall
     @returns('dict')
     @locals(dists='dict', emphases='tuple',
             belief_trust='float', belief_lag='float',
@@ -61,7 +61,7 @@ class Bot(BaseBot):
         params['_belief_lag'] = belief_lag
         return params
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int',

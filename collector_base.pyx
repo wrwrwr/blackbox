@@ -1,4 +1,4 @@
-from cython import ccall, cclass, cfunc, locals, returns
+from cython import ccall, cclass, locals, returns
 
 from interface import (clear_all_checkpoints, create_checkpoint,
                        load_from_checkpoint)
@@ -18,7 +18,7 @@ class BaseCollector:
         self.bot = bot
         self.checkpoints = []
 
-    @cfunc
+    @ccall
     @returns('int')
     @locals(checkpoint='int', bot='BaseBot')
     def create_checkpoint(self):
@@ -30,7 +30,7 @@ class BaseCollector:
         self.checkpoints.append((checkpoint, bot))
         return len(self.checkpoints) - 1
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(index='int', checkpoint='int', bot='BaseBot')
     def load_checkpoint(self, index):
@@ -41,7 +41,7 @@ class BaseCollector:
         load_from_checkpoint(checkpoint)
         self.bot = bot
 
-    @cfunc
+    @ccall
     @returns('void')
     def clear_checkpoints(self):
         """

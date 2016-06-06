@@ -1,7 +1,7 @@
 from copy import deepcopy
 from libc.math cimport ceil, sqrt
 
-from cython import cast, ccall, cclass, cfunc, locals, returns, wraparound
+from cython import cast, ccall, cclass, locals, returns, wraparound
 from numpy import asarray, empty, newaxis, ones, prod, repeat
 from numpy.random import randint
 
@@ -149,7 +149,7 @@ class BaseBot:
 
         self.last_action = -1
 
-    @cfunc
+    @ccall
     @returns('BaseBot')
     @locals(state='bint', bot='BaseBot')
     def clone(self, state=True):
@@ -172,7 +172,7 @@ class BaseBot:
             bot.last_action = self.last_action
         return bot
 
-    @cfunc
+    @ccall
     @returns('dict')
     @locals(dists='dict', emphases='tuple',
             features='int', feature='int', feature0='int', feature1='int',
@@ -213,7 +213,7 @@ class BaseBot:
             params[key] = coeffs
         return params
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(dists='dict', emphases='tuple', change='float', variations='int',
             variation='int')
@@ -224,7 +224,7 @@ class BaseBot:
         for variation in range(variations):
             self.vary_param(dists, emphases, change)
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(dists='dict', emphases='tuple', change='float',
             features='int', feature0='int', feature1='int', entry='int',
@@ -278,7 +278,7 @@ class BaseBot:
             score += c_get_score()
         return score / runs
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int')
     def act(self, steps):

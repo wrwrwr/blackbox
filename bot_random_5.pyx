@@ -4,7 +4,7 @@ Makes sequences of 5 steps randomly, with a set of probabilities for each step.
 Assumes 4 actions. Cannot make less than 5 steps at a time.
 Some 5% faster than the N implementation.
 """
-from cython import cast, cclass, cfunc, locals, returns
+from cython import cast, ccall, cclass, locals, returns
 from libc.stdlib cimport rand, RAND_MAX
 from numpy.random import randint
 
@@ -20,7 +20,7 @@ class Bot(BaseBot):
             'probs': (5, level['actions'] - 1)
         }
 
-    @cfunc
+    @ccall
     @returns('dict')
     @locals(dists='dict', emphases='tuple')
     def new_params(self, dists, emphases):
@@ -28,7 +28,7 @@ class Bot(BaseBot):
         probs.sort()
         return {'probs': probs}
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(dists='dict', emphases='tuple', change='float',
             actions='int', action='int', step='int', probs='float[:, :]',
@@ -45,7 +45,7 @@ class Bot(BaseBot):
         probs[step, action] = (min_prob if prob < min_prob else
                                     (max_prob if prob > max_prob else prob))
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int', remainder='int',
             probs='float[5][3]', random='float')

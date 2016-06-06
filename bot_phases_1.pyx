@@ -10,7 +10,7 @@ option, or better yet with the comb trainer.
 
 Assumes 4 actions.
 """
-from cython import cclass, cfunc, locals, returns
+from cython import ccall, cclass, locals, returns
 from numpy import array
 
 from bot_base cimport BaseBot
@@ -32,7 +32,7 @@ class Bot(BaseBot):
         super().__init__(level, *args, **kwargs)
         self.params['phases'] = array([level['steps'] // 2])
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int', phase1='int',
             features='int', feature='int',

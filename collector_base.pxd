@@ -7,7 +7,7 @@ cdef class BaseCollector:
         BaseBot bot
         list checkpoints
 
-    cdef int create_checkpoint(self)
-    cdef void load_checkpoint(self, int checkpoint)
-    cdef void clear_checkpoints(self)
+    cpdef int create_checkpoint(self)
+    cpdef void load_checkpoint(self, int checkpoint)
+    cpdef void clear_checkpoints(self)
     cpdef dict collect(self)

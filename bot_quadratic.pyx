@@ -4,7 +4,7 @@ action and chooses the one giving the highest value.
 
 Assumes 4 actions.
 """
-from cython import cclass, cfunc, locals, returns
+from cython import ccall, cclass, locals, returns
 
 from bot_base cimport BaseBot
 
@@ -20,7 +20,7 @@ class Bot(BaseBot):
             'state0q': (level['actions'], level['features'], level['features'])
         }
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature0='int', feature1='int',

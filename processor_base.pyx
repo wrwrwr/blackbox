@@ -1,6 +1,6 @@
 from collections import OrderedDict as odict
 
-from cython import ccall, cclass, cfunc, locals, returns
+from cython import ccall, cclass, locals, returns
 
 
 @cclass
@@ -26,7 +26,7 @@ class BaseProcessor:
         self.max_actions = max(m['level']['actions'] for _, m in self.data)
         self.max_steps = max(m['level']['steps'] for _, m in self.data)
 
-    @cfunc
+    @ccall
     @returns('object')
     @locals(entries='tuple')
     def results(self, entries):

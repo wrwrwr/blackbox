@@ -10,9 +10,9 @@ cdef class BaseBot:
         readonly dict params
         int last_action
 
-    cdef BaseBot clone(self, bint state=?)
-    cdef dict new_params(self, dict, tuple)
-    cdef void vary_params(self, dict, tuple, float, int)
-    cdef void vary_param(self, dict, tuple, float)
+    cpdef BaseBot clone(self, bint state=?)
+    cpdef dict new_params(self, dict, tuple)
+    cpdef void vary_params(self, dict, tuple, float, int)
+    cpdef void vary_param(self, dict, tuple, float)
     cpdef float evaluate(self, int)
-    cdef void act(self, int)
+    cpdef void act(self, int)

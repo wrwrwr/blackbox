@@ -8,7 +8,7 @@ linear bot, but with different training accents.
 
 Assumes 4 actions.
 """
-from cython import cast, cclass, cfunc, locals, returns, sizeof
+from cython import cast, ccall, cclass, locals, returns, sizeof
 from libc.stdlib cimport calloc, free
 from libc.string cimport memcpy
 
@@ -30,7 +30,7 @@ class Bot(BaseBot):
     def __dealloc__(self):
         free(self.state1)
 
-    @cfunc
+    @ccall
     @returns('Bot')
     @locals(state='bint', bot='Bot', state_size='int')
     def clone(self, state=True):
@@ -40,7 +40,7 @@ class Bot(BaseBot):
             memcpy(bot.state1, self.state1, state_size)
         return bot
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int', state_size='int',

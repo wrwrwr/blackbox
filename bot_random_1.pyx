@@ -3,7 +3,7 @@ Acts randomly, independently of the state, with fixed frequencies of actions.
 
 Assumes 4 actions.
 """
-from cython import cast, cclass, cfunc, locals, returns
+from cython import cast, ccall, cclass, locals, returns
 from libc.stdlib cimport rand, RAND_MAX
 from numpy.random import randint
 
@@ -19,7 +19,7 @@ class Bot(BaseBot):
             'probs': (level['actions'] - 1,)
         }
 
-    @cfunc
+    @ccall
     @returns('dict')
     @locals(dists='dict', emphases='tuple')
     def new_params(self, dists, emphases):
@@ -27,7 +27,7 @@ class Bot(BaseBot):
         probs.sort()
         return {'probs': probs}
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(dists='dict', emphases='tuple', change='float',
             actions='int', action='int', probs='float[:]',
@@ -43,7 +43,7 @@ class Bot(BaseBot):
         probs[action] = (min_prob if prob < min_prob else
                                 (max_prob if prob > max_prob else prob))
 
-    @cfunc
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int',
             probs='float[3]', random='float')
