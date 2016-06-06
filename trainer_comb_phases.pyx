@@ -7,10 +7,9 @@ phases as the config, otherwise each seed is used in a single phase.
 from itertools import product
 from warnings import warn
 
-from cython import ccall, cclass, locals, returns
+from cython import ccall, cclass, returns
 from numpy import allclose, stack
 
-from bot_base cimport BaseBot
 from trainer_comb cimport Trainer as TrainerComb
 
 
@@ -18,12 +17,6 @@ from trainer_comb cimport Trainer as TrainerComb
 class Trainer(TrainerComb):
     @ccall
     @returns('tuple')
-    @locals(bot_class='object', bot=BaseBot,
-            best_score='float', score='float',
-            best_combined_params='dict', combined_params='dict',
-            best_history='list', histories='list', history='list',
-            seeds='list', index='int', key='str', arrrays='list',
-            indices='list')
     def train(self):
         bot_class = type(self.seeds[0][0])
         best_score = float('-inf')

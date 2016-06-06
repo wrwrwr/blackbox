@@ -7,9 +7,8 @@ collection of stored sets.
 
 Does not need and config.
 """
-from cython import ccall, cclass, locals, returns
+from cython import ccall, cclass, returns
 
-from bot_base cimport BaseBot
 from trainer_base cimport BaseTrainer
 
 
@@ -17,9 +16,6 @@ from trainer_base cimport BaseTrainer
 class Trainer(BaseTrainer):
     @ccall
     @returns('tuple')
-    @locals(best_score='float', score='float',
-            best_bot=BaseBot, bot=BaseBot,
-            best_history='list', history='list')
     def train(self):
         best_score = float('-inf')
         best_bot = None

@@ -8,7 +8,7 @@ class BaseTrainer:
     """
     @locals(level='dict', config='tuple', dists='dict', emphases='tuple',
             seeds='tuple', runs='int')
-    def __cinit__(self, level, config, dists, emphases, seeds, runs):
+    def __init__(self, level, config, dists, emphases, seeds, runs):
         """
         Initializes the trainer for the given level and configuration.
 

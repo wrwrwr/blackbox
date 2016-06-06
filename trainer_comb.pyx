@@ -7,26 +7,21 @@ parameter values will be repeated by the base bot).
 """
 from warnings import warn
 
-from cython import ccall, cclass, locals, returns
+from cython import ccall, cclass, returns
 from numpy import allclose, linspace, stack
 
-from bot_base cimport BaseBot
 from trainer_base cimport BaseTrainer
 
 
 @cclass
 class Trainer(BaseTrainer):
-    @locals(level='dict', config='tuple', dists='dict', emphases='tuple',
-            seeds='tuple', runs='int', phase_count='int')
-    def __cinit__(self, level, config, dists, emphases, seeds, runs):
-        phase_count = int(config[0]) if config else len(seeds)
+    def __init__(self, level, config, *args, **kwargs):
+        super().__init__(level, config, *args, **kwargs)
+        phase_count = int(config[0]) if config else len(self.seeds)
         self.phases = linspace(1 / phase_count, 1, num=phase_count, dtype='f4')
 
     @ccall
     @returns('tuple')
-    @locals(combined_params='dict', histories='list',
-            bot=BaseBot, history='list', key='str', param='object',
-            arrays='list')
     def train(self):
         combined_params = {}
         histories = []
