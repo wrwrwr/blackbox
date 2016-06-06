@@ -97,7 +97,7 @@ arguments = (
     }),
     (('-da', '--dist_acceptance'), {
         'nargs': '+',
-        'default': ['beta', '-10', '.001', '19', '1'],
+        'default': ['beta', '-10', '11', '1', '1'],
         'help': "distribution for accepting param sets value changes; if it " +
                 "is supported below zero, declines may be accepted; if it " +
                 "supported above zero, growths may be rejected"
