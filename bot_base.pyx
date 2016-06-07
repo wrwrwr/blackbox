@@ -1,7 +1,7 @@
 from copy import deepcopy
 from libc.math cimport ceil, sqrt
 
-from cython import cast, ccall, cclass, locals, returns, wraparound
+from cython import ccall, cclass, locals, returns, wraparound
 from numpy import asarray, empty, newaxis, ones, prod, repeat
 from numpy.random import randint
 
@@ -31,19 +31,23 @@ class BaseBot:
     default nothing is scaled, but some subclasses update the multipliers).
     Frozen parameters are removed from these dictionaries after generation.
 
-    The base class manages a self.choices array, each entry in this array is
-    the number of the parameters set that should be used at the said time.
-    Parameter arrays get an additional inner-most axis collecting the values
-    from all parameter sets. If parameters without the additional axis are
-    loaded, the array is repeated with the same value for each set.
+    The base class manages a self.choices array. Each entry in this array is
+    the number of the parameters' set that should be used at the said time.
+    If a bot declares that it wants to use multiple values for parameter
+    entries, parameter arrays get an additional inner-most axis collecting
+    the values from all parameter sets. If parameters without the additional
+    axis are loaded, the array is repeated with the same entry for each set.
     """
+    def __cinit__(self, *args, **kwargs):
+        self.param_multi = False
+
     @locals(level='dict', params='dict', param_map='dict',
             param_freeze='tuple', param_scale='dict', dists='dict',
             emphases='tuple', phases='float[:]',
             steps='int', step='int', phase='int', phase_end='float',
-            key='str', target_key='str', shape='tuple', param='object',
-            scale='float', ndim='int', choices='int', reps='int',
-            param_shapes='dict')
+            key='str', target_key='str', shape='tuple', target_shape='tuple',
+            param='object', scale='float',
+            source_choices='int', target_choices='int', reps='float')
     @wraparound(True)
     def __init__(self, level, params={}, param_map={}, param_freeze=(),
                  param_scale={}, dists=None, emphases=None, phases=None):
@@ -67,35 +71,33 @@ class BaseBot:
         just a subset of needed parameter arrays, the rest will be randomized
         (as if parameters were newly generated).
 
-        Phases may be a list of phase ends as level time fractions, these
-        override phases info stored together with parameters.
-        If phases, as given or as found under '_phases' key in the params dict,
-        contains anything more than a single entry, the choices array is
-        initialized. For instance, for phases (.25, .5, .75, 1.) it is set to
-        [0, 0, ..., 0, 1, 1, ..., 1, 2, 2, ..., 2, 3, 3, ..., 3].
+        Phases may be a list of phase ends as level time fractions, overriding
+        phase splits stored under a _phases key in the parameters. For a multi-
+        valued bot the choices array is initialized. For instance, for phases
+        (.33, .67, 1.) it is set to [0, ..., 0, 1, ..., 1, 2, ..., 2].
         """
-        steps = level['steps']
-        param_shapes = self.param_shapes
         self.level = level
 
-        if phases is None:
-            phases = params.get('_phases', ones(1, dtype='f4'))
-        self.param_choices = len(phases)
-        if len(phases) == 1:
-            self.choices = None
-        else:
+        if self.param_multi:
+            steps = level['steps']
+            if phases is None:
+                phases = params.get('_phases', ones(1, dtype='f4'))
+            self.param_choices = len(phases)
             self.choices = empty(steps, dtype='i4')
             step = 0
             for phase, phase_end in enumerate(phases):
                 while step < phase_end * steps:
                     self.choices[step] = phase
                     step += 1
-            for key, shape in param_shapes.items():
-                param_shapes[key] = tuple(list(shape) + [self.param_choices])
+            for key in self.param_shapes:
+                self.param_shapes[key] += (self.param_choices,)
+        else:
+            self.param_choices = 1
+            self.choices = None
 
-        self.param_sizes = {k: prod(s) for k, s in param_shapes.items()}
+        self.param_sizes = {k: prod(s) for k, s in self.param_shapes.items()}
         self.param_entries = sum(self.param_sizes.values())
-        self.param_multipliers = {k: 1 for k in param_shapes.keys()}
+        self.param_multipliers = {k: 1 for k in self.param_shapes.keys()}
 
         if dists is None or emphases is None:
             self.params = {}
@@ -105,40 +107,42 @@ class BaseBot:
             target_keys = param_map.get(key, []) + [key]
             for target_key in target_keys:
                 try:
-                    shape = param_shapes[target_key]
+                    target_shape = self.param_shapes[target_key]
                 except KeyError:
                     pass
                 else:
-                    ndim = len(shape) - (0 if self.choices is None else 1)
-                    if param.ndim == ndim:
-                        # Param has a single choice for each entry.
-                        choices = 1
-                    elif param.ndim == ndim + 1:
-                        # Multiple choices are kept as the inner-most axis.
-                        choices = param.shape[-1]
-                    else:
-                        raise ValueError("Wrong parameter shape")
-                    if self.param_choices < choices:
-                        # For example 5-set used with 3 phases or congruences.
-                        if self.param_choices == 1:
-                            param = param[..., 0]
+                    if param.shape != target_shape:
+                        if self.param_multi:
+                            if param.ndim == len(target_shape) - 1:
+                                # Single-set promoted to a one-choice multi.
+                                param = param[..., newaxis]
+                            if param.shape[:-1] == target_shape[:-1]:
+                                # M choices replicated / cropped to N choices.
+                                source_choices = param.shape[-1]
+                                target_choices = target_shape[-1]
+                                reps = float(target_choices) / source_choices
+                                param = repeat(param, int(ceil(reps)), axis=-1)
+                                param = param[..., :target_choices]
+                            else:
+                                raise ValueError(
+                                    "Wrong parameter shape (multi " +
+                                    "'{}', got {}, expected {})".format(
+                                        target_key, param.shape, target_shape))
                         else:
-                            param = param[..., :self.param_choices]
-                    elif self.param_choices > choices:
-                        # Single-set used for a multi-bot, or a multi-set used
-                        # with more phases or congruences than it has choices.
-                        if param.ndim < len(shape):
-                            param = param[..., newaxis]
-                        reps = cast('int', ceil(cast('float',
-                                                self.param_choices) / choices))
-                        param = repeat(param, reps, axis=-1)
-                        param = param[..., :self.param_choices]
+                            if param.shape[:-1] == target_shape:
+                                # Multi-set clipped to a single-set.
+                                param = param[..., 0]
+                            else:
+                                raise ValueError(
+                                    "Wrong parameter shape (single " +
+                                    "'{}', got {}, expected {})".format(
+                                        target_key, param.shape, target_shape))
                     self.params[target_key] = deepcopy(param)
 
         for key, scale in param_scale.items():
             self.params[key] *= scale
 
-        if len(phases) > 1:
+        if self.param_multi:
             self.params['_phases'] = asarray(phases)
 
         for key in param_freeze:
@@ -162,6 +166,7 @@ class BaseBot:
         bot = self.__new__(type(self), self.level)
         bot.level = self.level
         bot.param_shapes = self.param_shapes
+        bot.param_multi = self.param_multi
         bot.param_sizes = self.param_sizes
         bot.param_entries = self.param_entries
         bot.param_multipliers = self.param_multipliers
@@ -198,18 +203,18 @@ class BaseBot:
                 if key[-1] == 'l':
                     for feature in range(features):
                         emp = emphases[feature]
-                        if self.param_choices == 1:
-                            coeffs[..., feature] *= emp
-                        else:
+                        if self.param_multi:
                             coeffs[..., feature, :] *= emp
+                        else:
+                            coeffs[..., feature] *= emp
                 elif key[-1] == 'q':
                     for feature0 in range(features):
                         for feature1 in range(features):
                             emp = sqrt(emphases[feature0] * emphases[feature1])
-                            if self.param_choices == 1:
-                                coeffs[..., feature0, feature1] *= emp
-                            else:
+                            if self.param_multi:
                                 coeffs[..., feature0, feature1, :] *= emp
+                            else:
+                                coeffs[..., feature0, feature1] *= emp
             params[key] = coeffs
         return params
 

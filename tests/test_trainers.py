@@ -1,4 +1,3 @@
-from numpy import array
 from pytest import mark
 from scipy.stats import beta, norm
 
@@ -11,7 +10,7 @@ configs = {
     'anneal': (5, 2, 1),
     'anneal_d': (5, 2, 1, .1),
     'comb': (3,),
-#    'comb_phases': (3,),
+    'comb_phases': (3,),
     'local': (5, 1),
     'local_d': (5, 1, .1),
     'select': ()
@@ -28,11 +27,9 @@ dists = {
 
 emphases = (1.,) * level['features']
 
-phases = array([.5, 1.], dtype='f4')
-
 bot_class = available_bots['linear_m']
-bot1 = bot_class(level, dists=dists, emphases=emphases, phases=phases)
-bot2 = bot_class(level, dists=dists, emphases=emphases, phases=phases)
+bot1 = bot_class(level, dists=dists, emphases=emphases)
+bot2 = bot_class(level, dists=dists, emphases=emphases)
 seeds = ((bot1, []), (bot2, []))
 
 

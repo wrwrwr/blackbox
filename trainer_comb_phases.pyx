@@ -8,7 +8,7 @@ from itertools import product
 from warnings import warn
 
 from cython import ccall, cclass, returns
-from numpy import allclose, stack
+from numpy import allclose, concatenate
 
 from trainer_comb cimport Trainer as TrainerComb
 
@@ -32,13 +32,15 @@ class Trainer(TrainerComb):
                 histories.append(history)
 
             for key, arrays in combined_params.items():
-                if key[0] != '_':
-                    combined_params[key] = stack(arrays, axis=-1)
-                else:
+                if key[0] == '_':
+                    # Meta-parameters are presumed to be the same.
                     for array in arrays:
                         if not allclose(array, arrays[0]):
                             warn("Combining with differing meta-parameters")
                     combined_params[key] = arrays[0]
+                else:
+                    # Coefficients are concatenated along the last axis.
+                    combined_params[key] = concatenate(arrays, axis=-1)
             combined_params['_phases'] = self.phases
 
             score = bot_class(self.level, combined_params).evaluate(self.runs)

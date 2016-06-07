@@ -8,7 +8,7 @@ parameter values will be repeated by the base bot).
 from warnings import warn
 
 from cython import ccall, cclass, returns
-from numpy import allclose, linspace, stack
+from numpy import allclose, concatenate, linspace
 
 from trainer_base cimport BaseTrainer
 
@@ -32,13 +32,15 @@ class Trainer(BaseTrainer):
             histories.append(history)
 
         for key, arrays in combined_params.items():
-            if key[0] != '_':
-                combined_params[key] = stack(arrays, axis=-1)
-            else:
+            if key[0] == '_':
+                # Meta-parameters are presumed to be the same.
                 for array in arrays:
                     if not allclose(array, arrays[0]):
-                        warn("Combining params with differing meta-parameters")
+                        warn("Combining with differing meta-parameters")
                 combined_params[key] = arrays[0]
+            else:
+                # Coefficients are concatenated along the last axis.
+                combined_params[key] = concatenate(arrays, axis=-1)
         combined_params['_phases'] = self.phases
 
         return combined_params, [histories]

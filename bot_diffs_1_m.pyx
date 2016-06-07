@@ -18,6 +18,7 @@ class Bot(BaseBot):
             'state0l': (level['actions'], level['features']),
             'diffs0l': (level['actions'], level['features'])
         }
+        self.param_multi = True
         self.state1 = cast('float*', calloc(level['features'], sizeof(float)))
 
     def __dealloc__(self):

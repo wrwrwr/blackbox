@@ -23,6 +23,7 @@ class Bot(BaseBot):
             'diffs2l': (level['actions'], level['features']),
             'diffs3l': (level['actions'], level['features'])
         }
+        self.param_multi = True
         self.state1 = cast('float*', calloc(level['features'], sizeof(float)))
         self.state2 = cast('float*', calloc(level['features'], sizeof(float)))
         self.state3 = cast('float*', calloc(level['features'], sizeof(float)))

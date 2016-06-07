@@ -15,6 +15,7 @@ class Bot(BaseBot):
             'free': (level['actions'],),
             'state0l': (level['actions'], level['features'])
         }
+        self.param_multi = True
 
     @ccall
     @returns('void')
