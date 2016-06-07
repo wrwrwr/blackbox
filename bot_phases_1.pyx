@@ -20,12 +20,13 @@ from interface cimport c_do_action, c_get_state, c_get_time
 
 @cclass
 class Bot(BaseBot):
-    def __cinit__(self, level, *args, **kwargs):
-        self.param_shapes = {
-            'freep0': (level['actions'],),
-            'freep1': (level['actions'],),
-            'state0p0l': (level['actions'], level['features']),
-            'state0p1l': (level['actions'], level['features'])
+    @staticmethod
+    def shapes(features, actions):
+        return {
+            'freep0': (actions,),
+            'freep1': (actions,),
+            'state0p0l': (actions, features),
+            'state0p1l': (actions, features)
         }
 
     def __init__(self, level, *args, **kwargs):

@@ -15,10 +15,9 @@ from interface cimport c_do_action, c_get_time
 
 @cclass
 class Bot(BaseBot):
-    def __cinit__(self, level, *args, **kwargs):
-        self.param_shapes = {
-            'probs': (5, level['actions'] - 1)
-        }
+    @staticmethod
+    def shapes(features, actions):
+        return {'probs': (5, actions - 1)}
 
     @ccall
     @returns('dict')

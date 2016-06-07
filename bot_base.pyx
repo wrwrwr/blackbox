@@ -20,9 +20,8 @@ class BaseBot:
     selecting specific distributions for parameter mutation and variation.
 
     The base constructor precalculates parameter array sizes and their total
-    count of entries. The only info that a subclass should provide is a
-    param_shapes map from param keys to array shape tuples. The attribute
-    should be set before the super call in __init__().
+    count of entries. The only thing that a subclass has to provide is a static
+    shapes() method that returns a map from param keys to array shape tuples.
 
     Three attributes are used for the generic parameter generation and
     mutation: param_sizes maps param keys to array sizes, param_entries is
@@ -31,15 +30,14 @@ class BaseBot:
     default nothing is scaled, but some subclasses update the multipliers).
     Frozen parameters are removed from these dictionaries after generation.
 
-    The base class manages a self.choices array. Each entry in this array is
-    the number of the parameters' set that should be used at the said time.
+    The base class manages a choices array. Each entry in this array is the
+    number of the parameters' set that should be used at the said time.
     If a bot declares that it wants to use multiple values for parameter
     entries, parameter arrays get an additional inner-most axis collecting
     the values from all parameter sets. If parameters without the additional
     axis are loaded, the array is repeated with the same entry for each set.
     """
-    def __cinit__(self, *args, **kwargs):
-        self.param_multi = False
+    multi = False
 
     @locals(level='dict', params='dict', param_map='dict',
             param_freeze='tuple', param_scale='dict', dists='dict',
@@ -77,8 +75,9 @@ class BaseBot:
         (.33, .67, 1.) it is set to [0, ..., 0, 1, ..., 1, 2, ..., 2].
         """
         self.level = level
+        self.param_shapes = self.shapes(level['features'], level['actions'])
 
-        if self.param_multi:
+        if self.multi:
             steps = level['steps']
             if phases is None:
                 phases = params.get('_phases', ones(1, dtype='f4'))
@@ -112,7 +111,7 @@ class BaseBot:
                     pass
                 else:
                     if param.shape != target_shape:
-                        if self.param_multi:
+                        if self.multi:
                             if param.ndim == len(target_shape) - 1:
                                 # Single-set promoted to a one-choice multi.
                                 param = param[..., newaxis]
@@ -142,14 +141,14 @@ class BaseBot:
         for key, scale in param_scale.items():
             self.params[key] *= scale
 
-        if self.param_multi:
+        if self.multi:
             self.params['_phases'] = asarray(phases)
 
         for key in param_freeze:
             self.param_entries -= self.param_sizes[key]
             del self.param_shapes[key]
             del self.param_sizes[key]
-            del self.param_multipliers[key]
+            del self.multipliers[key]
 
         self.last_action = -1
 
@@ -166,7 +165,6 @@ class BaseBot:
         bot = self.__new__(type(self), self.level)
         bot.level = self.level
         bot.param_shapes = self.param_shapes
-        bot.param_multi = self.param_multi
         bot.param_sizes = self.param_sizes
         bot.param_entries = self.param_entries
         bot.param_multipliers = self.param_multipliers
@@ -175,6 +173,8 @@ class BaseBot:
         bot.params = deepcopy(self.params)
         if state:
             bot.last_action = self.last_action
+        else:
+            bot.last_action = -1
         return bot
 
     @ccall
@@ -186,7 +186,7 @@ class BaseBot:
     @wraparound(True)
     def new_params(self, dists, emphases):
         """
-        Generates a new set of real parameters according to self.param_shapes,
+        Generates a new set of real parameters according to param_shapes,
         taking emphases into account for typical parameters.
 
         Parameter arrays with keys containing "state" have emphases applied to
@@ -203,7 +203,7 @@ class BaseBot:
                 if key[-1] == 'l':
                     for feature in range(features):
                         emp = emphases[feature]
-                        if self.param_multi:
+                        if self.multi:
                             coeffs[..., feature, :] *= emp
                         else:
                             coeffs[..., feature] *= emp
@@ -211,7 +211,7 @@ class BaseBot:
                     for feature0 in range(features):
                         for feature1 in range(features):
                             emp = sqrt(emphases[feature0] * emphases[feature1])
-                            if self.param_multi:
+                            if self.multi:
                                 coeffs[..., feature0, feature1, :] *= emp
                             else:
                                 coeffs[..., feature0, feature1] *= emp

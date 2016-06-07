@@ -18,12 +18,16 @@ from interface cimport c_do_action, c_get_score, c_get_state, c_get_time
 
 @cclass
 class Bot(BaseBot):
+    @staticmethod
+    def shapes(features, actions):
+        return {}
+
     def __cinit__(self, level, *args, **kwargs):
-        self.param_shapes = {}
-        self.states = cast('float*', malloc(level['steps'] *
-                                            level['features'] * sizeof(float)))
-        self.scores = cast('float*', malloc(level['steps'] * sizeof(float)))
-        self.actions = cast('int*', malloc(level['steps'] * sizeof(int)))
+        steps = level['steps']
+        features = level['features']
+        self.states = cast('float*', malloc(steps * features * sizeof(float)))
+        self.scores = cast('float*', malloc(steps * sizeof(float)))
+        self.actions = cast('int*', malloc(steps * sizeof(int)))
 
     def __dealloc__(self):
         free(self.states)

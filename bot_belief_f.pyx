@@ -14,19 +14,21 @@ from interface cimport c_do_action, c_get_state
 
 @cclass
 class Bot(BaseBot):
-    def __cinit__(self, level, *args, **kwargs):
-        self.param_shapes = {
-            'free': (level['actions'],),
-            'state0l': (level['actions'], level['features']),
-            'belief0l': (level['actions'], level['features']),
-            'belief_free': (level['features'],),
-            'belief_state0l': (level['features'], level['features']),
-            'belief_belief0l': (level['features'], level['features'])
+    @staticmethod
+    def shapes(features, actions):
+        return {
+            'free': (actions,),
+            'state0l': (actions, features),
+            'belief0l': (actions, features),
+            'belief_free': (features,),
+            'belief_state0l': (features, features),
+            'belief_belief0l': (features, features)
         }
-        self.beliefs0 = cast('float*', calloc(level['features'],
-                                                        sizeof(float)))
-        self.beliefs0t = cast('float*', calloc(level['features'],
-                                                        sizeof(float)))
+
+    def __cinit__(self, level, *args, **kwargs):
+        features = level['features']
+        self.beliefs0 = cast('float*', calloc(features, sizeof(float)))
+        self.beliefs0t = cast('float*', calloc(features, sizeof(float)))
 
     def __dealloc__(self):
         free(self.beliefs0t)

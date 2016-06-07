@@ -5,10 +5,8 @@ Takes the number of phases as the config, splitting the level into the given
 number of equal parts (if the phases count does not match the seeds count, the
 parameter values will be repeated by the base bot).
 """
-from warnings import warn
-
 from cython import ccall, cclass, returns
-from numpy import allclose, concatenate, linspace
+from numpy import concatenate, linspace
 
 from trainer_base cimport BaseTrainer
 
@@ -23,24 +21,13 @@ class Trainer(BaseTrainer):
     @ccall
     @returns('tuple')
     def train(self):
+        bots, histories = zip(*self.seeds)
+        target_keys = bots[0].shapes(0, 0).keys()
+
         combined_params = {}
-        histories = []
-
-        for bot, history in self.seeds:
-            for key, param in bot.params.items():
-                combined_params.setdefault(key, []).append(param)
-            histories.append(history)
-
-        for key, arrays in combined_params.items():
-            if key[0] == '_':
-                # Meta-parameters are presumed to be the same.
-                for array in arrays:
-                    if not allclose(array, arrays[0]):
-                        warn("Combining with differing meta-parameters")
-                combined_params[key] = arrays[0]
-            else:
-                # Coefficients are concatenated along the last axis.
-                combined_params[key] = concatenate(arrays, axis=-1)
+        for key in target_keys:
+            params = [b.params[key] for b in bots]
+            combined_params[key] = concatenate(params, axis=-1)
         combined_params['_phases'] = self.phases
 
         return combined_params, [histories]

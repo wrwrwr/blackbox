@@ -12,15 +12,18 @@ from interface cimport c_do_action, c_get_state
 
 @cclass
 class Bot(BaseBot):
-    def __cinit__(self, level, *args, **kwargs):
-        self.param_shapes = {
-            'free': (level['actions'],),
-            'state0l': (level['actions'], level['features']),
-            'belief0l': (level['actions'], 4),
+    @staticmethod
+    def shapes(features, actions):
+        return {
+            'free': (actions,),
+            'state0l': (actions, features),
+            'belief0l': (actions, 4),
             'belief_free': (4,),
-            'belief_state0l': (4, level['features']),
+            'belief_state0l': (4, features),
             'belief_belief0l': (4, 4)
         }
+
+    def __cinit__(self, *args, **kwargs):
         self.beliefs = [0] * 4
 
     @ccall

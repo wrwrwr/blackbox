@@ -16,10 +16,9 @@ n = declare('int', 100)
 
 @cclass
 class Bot(BaseBot):
-    def __cinit__(self, level, *args, **kwargs):
-        self.param_shapes = {
-            'probs': (n, level['actions'] - 1)
-        }
+    @staticmethod
+    def shapes(features, actions):
+        return {'probs': (n, actions - 1)}
 
     @ccall
     @returns('dict')

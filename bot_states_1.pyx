@@ -17,12 +17,15 @@ from interface cimport c_do_action, c_get_state
 
 @cclass
 class Bot(BaseBot):
-    def __cinit__(self, level, *args, **kwargs):
-        self.param_shapes = {
-            'free': (level['actions'],),
-            'state0l': (level['actions'], level['features']),
-            'state1l': (level['actions'], level['features'])
+    @staticmethod
+    def shapes(features, actions):
+        return {
+            'free': (actions,),
+            'state0l': (actions, features),
+            'state1l': (actions, features)
         }
+
+    def __cinit__(self, level, *args, **kwargs):
         self.state1 = cast('float*', calloc(level['features'], sizeof(float)))
 
     def __dealloc__(self):

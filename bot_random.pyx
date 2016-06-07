@@ -15,8 +15,9 @@ from interface cimport c_do_action
 
 @cclass
 class Bot(BaseBot):
-    def __cinit__(self, level, *args, **kwargs):
-        self.param_shapes = {}
+    @staticmethod
+    def shapes(features, actions):
+        return {}
 
     @ccall
     @returns('void')

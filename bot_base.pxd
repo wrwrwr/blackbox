@@ -2,8 +2,7 @@ cdef class BaseBot:
     cdef:
         dict level
         dict param_shapes
-        bint param_multi
-        dict param_sizes 
+        dict param_sizes
         int param_entries
         dict param_multipliers
         int param_choices

@@ -5,10 +5,9 @@ Provide the seeds to combine using --stored_seeds. You may give the number of
 phases as the config, otherwise each seed is used in a single phase.
 """
 from itertools import product
-from warnings import warn
 
 from cython import ccall, cclass, returns
-from numpy import allclose, concatenate
+from numpy import concatenate
 
 from trainer_comb cimport Trainer as TrainerComb
 
@@ -18,33 +17,24 @@ class Trainer(TrainerComb):
     @ccall
     @returns('tuple')
     def train(self):
-        bot_class = type(self.seeds[0][0])
+        target_class = type(self.seeds[0][0])
+        target_keys = target_class.shapes(0, 0).keys()
         best_score = float('-inf')
         best_combined_params = {}
         best_history = []
 
         for seeds in product(enumerate(self.seeds), repeat=len(self.phases)):
-            combined_params = {}
-            histories = []
-            for index, (bot, history) in seeds:
-                for key, param in bot.params.items():
-                    combined_params.setdefault(key, []).append(param)
-                histories.append(history)
+            indices, seeds = zip(*seeds)
+            bots, histories = zip(*seeds)
 
-            for key, arrays in combined_params.items():
-                if key[0] == '_':
-                    # Meta-parameters are presumed to be the same.
-                    for array in arrays:
-                        if not allclose(array, arrays[0]):
-                            warn("Combining with differing meta-parameters")
-                    combined_params[key] = arrays[0]
-                else:
-                    # Coefficients are concatenated along the last axis.
-                    combined_params[key] = concatenate(arrays, axis=-1)
+            combined_params = {}
+            for key in target_keys:
+                params = [b.params[key] for b in bots]
+                combined_params[key] = concatenate(params, axis=-1)
             combined_params['_phases'] = self.phases
 
-            score = bot_class(self.level, combined_params).evaluate(self.runs)
-            indices = [s[0] for s in seeds]
+            bot = target_class(self.level, combined_params)
+            score = bot.evaluate(self.runs)
             print(indices, score)
 
             if score > best_score:
