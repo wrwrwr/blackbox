@@ -369,7 +369,7 @@ def training_desc(info, verbosity, precision):
                 ", Scores: {}".format(scores_desc(info['scores'], verbosity,
                                                   precision))
     ]
-    if info['phases']:
+    if info['phases'] is not None:
         desc.insert(3, "Phases: {}".format(
                                     phases_desc(info['phases'], precision)))
     if info['emphases']:
