@@ -7,7 +7,7 @@ class BaseProcessor:
     Abstract processor class, defines the interface.
     """
     @locals(data='tuple')
-    def __cinit__(self, data):
+    def __init__(self, data):
         """
         Initializes the processor for the given data sets.
 

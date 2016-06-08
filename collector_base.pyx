@@ -10,7 +10,7 @@ class BaseCollector:
     Abstract collector class, defines the interface.
     """
     @locals(level='dict', bot='BaseBot')
-    def __cinit__(self, level, bot):
+    def __init__(self, level, bot):
         """
         Initializes the collector for the given level and bot.
         """
