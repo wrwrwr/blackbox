@@ -1,7 +1,7 @@
 cdef class BaseTrainer:
     cdef:
         dict level, dists
-        tuple config, emphases
+        tuple emphases
         tuple seeds
         int runs
 

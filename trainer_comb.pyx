@@ -14,7 +14,7 @@ from trainer_base cimport BaseTrainer
 @cclass
 class Trainer(BaseTrainer):
     def __init__(self, level, config, *args, **kwargs):
-        super().__init__(level, config, *args, **kwargs)
+        super().__init__(level, (), *args, **kwargs)
         phase_count = int(config[0]) if config else len(self.seeds)
         self.phases = linspace(1 / phase_count, 1, num=phase_count, dtype='f4')
 

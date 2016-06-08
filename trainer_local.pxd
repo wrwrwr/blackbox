@@ -3,6 +3,6 @@ from trainer_base cimport BaseTrainer
 
 cdef class Trainer(BaseTrainer):
     cdef:
-        int steps
-        float change
+        public int steps
+        public float change
 

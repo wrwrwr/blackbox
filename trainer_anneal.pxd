@@ -1,7 +1,6 @@
-from trainer_base cimport BaseTrainer
+from trainer_local cimport Trainer as TrainerLocal
 
 
-cdef class Trainer(BaseTrainer):
+cdef class Trainer(TrainerLocal):
     cdef:
-        int steps
-        float acceptance_ease, change
+        public float acceptance_ease

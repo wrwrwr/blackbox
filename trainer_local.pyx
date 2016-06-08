@@ -16,10 +16,10 @@ from trainer_base cimport BaseTrainer
 
 @cclass
 class Trainer(BaseTrainer):
-    def __init__(self, level, config, *args, **kwargs):
-        super().__init__(level, config, *args, **kwargs)
-        self.steps = int(config[0])
-        self.change = float(config[1])
+    arguments = (
+        ('steps', int),
+        ('change', float)
+    )
 
     @ccall
     @returns('tuple')

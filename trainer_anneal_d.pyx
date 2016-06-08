@@ -10,17 +10,17 @@ basic anneal trainer.
 """
 from cython import ccall, cclass, returns
 
-from trainer_base cimport BaseTrainer
+from trainer_local_d cimport Trainer as TrainerLocalD
 
 
 @cclass
-class Trainer(BaseTrainer):
-    def __init__(self, level, config, *args, **kwargs):
-        super().__init__(level, config, *args, **kwargs)
-        self.steps = int(config[0])
-        self.acceptance_ease = float(config[1])
-        self.change_high = float(config[2])
-        self.change_low = float(config[3])
+class Trainer(TrainerLocalD):
+    arguments = (
+        ('steps', int),
+        ('acceptance_ease', float),
+        ('change_high', float),
+        ('change_low', float)
+    )
 
     @ccall
     @returns('tuple')

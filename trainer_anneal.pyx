@@ -28,16 +28,16 @@ whether to continue with a mutated bot or keep the previous one.
 """
 from cython import ccall, cclass, returns
 
-from trainer_base cimport BaseTrainer
+from trainer_local cimport Trainer as TrainerLocal
 
 
 @cclass
-class Trainer(BaseTrainer):
-    def __init__(self, level, config, *args, **kwargs):
-        super().__init__(level, config, *args, **kwargs)
-        self.steps = int(config[0])
-        self.acceptance_ease = float(config[1])
-        self.change = float(config[2])
+class Trainer(TrainerLocal):
+    arguments = (
+        ('steps', int),
+        ('acceptance_ease', float),
+        ('change', float)
+    )
 
     @ccall
     @returns('tuple')
