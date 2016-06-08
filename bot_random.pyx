@@ -20,6 +20,13 @@ class Bot(BaseBot):
         return {}
 
     @ccall
+    @returns('BaseBot')
+    @locals(state='bint', bot='BaseBot')
+    def clone(self, state=True):
+        assert state  # Otherwise, we'd risk confusing last actions.
+        return self
+
+    @ccall
     @returns('void')
     @locals(steps='int', step='int', actions='int', action='int')
     def act(self, steps):
