@@ -12,4 +12,5 @@ params/*.npz
 profiles/
 scores/
 notes.txt
+story.txt
 todo.txt

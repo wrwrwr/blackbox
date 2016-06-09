@@ -15,7 +15,7 @@ from interface cimport c_do_action, c_get_state
 @cclass
 class Bot(BaseBot):
     @staticmethod
-    def shapes(features, actions):
+    def shapes(steps, actions, features):
         return {
             'free': (actions,),
             'state0l': (actions, features),

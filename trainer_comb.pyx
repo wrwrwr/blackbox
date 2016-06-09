@@ -22,7 +22,7 @@ class Trainer(BaseTrainer):
     @returns('tuple')
     def train(self):
         bots, histories = zip(*self.seeds)
-        target_keys = bots[0].shapes(0, 0).keys()
+        target_keys = bots[0].shapes(0, 0, 0).keys()
 
         combined_params = {}
         for key in target_keys:

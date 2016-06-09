@@ -75,7 +75,8 @@ class BaseBot:
         (.33, .67, 1.) it is set to [0, ..., 0, 1, ..., 1, 2, ..., 2].
         """
         self.level = level
-        self.param_shapes = self.shapes(level['features'], level['actions'])
+        self.param_shapes = self.shapes(level['steps'], level['actions'],
+                                        level['features'])
 
         if self.multi:
             steps = level['steps']

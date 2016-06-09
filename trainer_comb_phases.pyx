@@ -18,7 +18,7 @@ class Trainer(TrainerComb):
     @returns('tuple')
     def train(self):
         target_class = type(self.seeds[0][0])
-        target_keys = target_class.shapes(0, 0).keys()
+        target_keys = target_class.shapes(0, 0, 0).keys()
         best_score = float('-inf')
         best_combined_params = {}
         best_history = []

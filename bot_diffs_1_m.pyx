@@ -15,7 +15,7 @@ class Bot(BaseBot):
     multi = True
 
     @staticmethod
-    def shapes(features, actions):
+    def shapes(steps, actions, features):
         return {
             'free': (actions,),
             'state0l': (actions, features),

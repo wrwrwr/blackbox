@@ -100,8 +100,8 @@ if __name__ == '__main__':
             if 'param_scale' not in record:
                 record['param_scale'] = {}
             if isinstance(record['level'], str):
-                record['level'] = {'key': record['level'], 'features': -1,
-                                   'actions': -1, 'steps': -1}
+                record['level'] = {'key': record['level'], 'steps': -1,
+                                   'actions': -1, 'features': -1}
             if 'scores' not in record:
                 score = record.pop('best_score', float('-inf'))
                 record['scores'] = odict(train=score)

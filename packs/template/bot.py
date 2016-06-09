@@ -16,9 +16,9 @@ from bot_wrapper import do_act
 if __name__ == '__main__':
     load_level('../levels/train_level.data', verbose=1)
     level = {
-        'features': get_num_of_features(),
+        'steps': get_max_time(),
         'actions': get_num_of_actions(),
-        'steps': get_max_time()
+        'features': get_num_of_features()
     }
     params = dict(load('params.npz'))
     do_act(level, params)

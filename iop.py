@@ -127,9 +127,9 @@ def load_level(level, verbosity):
         print("Loading level from {}".format(path))
     bb_load_level(path, verbose=verbosity > 3)
     return {'key': level,
-            'features': get_num_of_features(),
+            'steps': get_max_time(),
             'actions': get_num_of_actions(),
-            'steps': get_max_time()}
+            'features': get_num_of_features()}
 
 
 def resolve_path(agent, key, folder):
@@ -323,7 +323,7 @@ def level_desc(level):
     """
     Short, readable level and its parameters string.
     """
-    return "{key} ({features}, {actions}, {steps})".format(**level)
+    return "{key} ({steps}, {actions}, {features})".format(**level)
 
 
 def time_desc(duration, precision):

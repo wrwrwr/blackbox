@@ -16,7 +16,7 @@ from interface cimport c_do_action
 @cclass
 class Bot(BaseBot):
     @staticmethod
-    def shapes(features, actions):
+    def shapes(steps, actions, features):
         return {}
 
     @ccall

@@ -17,7 +17,7 @@ n = declare('int', 100)
 @cclass
 class Bot(BaseBot):
     @staticmethod
-    def shapes(features, actions):
+    def shapes(steps, actions, features):
         return {'probs': (n, actions - 1)}
 
     @ccall
@@ -31,7 +31,7 @@ class Bot(BaseBot):
     @ccall
     @returns('void')
     @locals(dists='dict', emphases='tuple', change='float',
-            actions='int', action='int', step='int', probs='float[:, :]',
+            step='int', actions='int', action='int', probs='float[:, :]',
             prob='float', min_prob='float', max_prob='float')
     def vary_param(self, dists, emphases, change):
         actions = self.level['actions']

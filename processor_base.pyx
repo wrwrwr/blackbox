@@ -20,9 +20,9 @@ class BaseProcessor:
         """
         self.data = data
         # WA: Cython doesn't like just "data" in the following three.
-        self.max_features = max(m['level']['features'] for _, m in self.data)
-        self.max_actions = max(m['level']['actions'] for _, m in self.data)
         self.max_steps = max(m['level']['steps'] for _, m in self.data)
+        self.max_actions = max(m['level']['actions'] for _, m in self.data)
+        self.max_features = max(m['level']['features'] for _, m in self.data)
 
     @ccall
     @returns('tuple')

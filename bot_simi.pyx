@@ -19,7 +19,7 @@ from interface cimport c_do_action, c_get_score, c_get_state, c_get_time
 @cclass
 class Bot(BaseBot):
     @staticmethod
-    def shapes(features, actions):
+    def shapes(steps, actions, features):
         return {}
 
     def __cinit__(self, level, *args, **kwargs):
