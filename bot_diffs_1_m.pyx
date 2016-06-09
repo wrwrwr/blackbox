@@ -42,9 +42,9 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int', state_size='int',
-            choices='int[:]', choice='int',
-            free='float[:, :]', state0l='float[:, :, :]',
-            diffs0l='float[:, :, :]',
+            choices='int[::1]', choice='int',
+            free='float[:, ::1]', state0l='float[:, :, ::1]',
+            diffs0l='float[:, :, ::1]',
             state0='float*', state1='float*', state0f='float', diffs0f='float')
     def act(self, steps):
         features = self.level['features']

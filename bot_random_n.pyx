@@ -31,7 +31,7 @@ class Bot(BaseBot):
     @ccall
     @returns('void')
     @locals(dists='dict', emphases='tuple', change='float',
-            step='int', actions='int', action='int', probs='float[:, :]',
+            step='int', actions='int', action='int', probs='float[:, ::1]',
             prob='float', min_prob='float', max_prob='float')
     def vary_param(self, dists, emphases, change):
         actions = self.level['actions']
@@ -48,7 +48,7 @@ class Bot(BaseBot):
     @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int', remainder='int',
-            probs='float[:, :]', random='float')
+            probs='float[:, ::1]', random='float')
     def act(self, steps):
         probs = self.params['probs']
         action = -1

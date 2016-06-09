@@ -6,7 +6,7 @@ cdef class BaseBot:
         int param_entries
         dict param_multipliers
         int param_choices
-        int[:] choices
+        int[::1] choices
         readonly dict params
         int last_action
 

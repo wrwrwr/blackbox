@@ -25,7 +25,8 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature0='int', feature1='int',
-            free='float[4]', state0l='float[:, :]', state0q='float[:, :, :]',
+            free='float[4]', state0l='float[:, ::1]',
+            state0q='float[:, :, ::1]',
             state0q0='float[:, :]', state0q1='float[:, :]',
             state0q2='float[:, :]', state0q3='float[:, :]',
             values='float[4]',

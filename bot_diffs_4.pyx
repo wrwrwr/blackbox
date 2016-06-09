@@ -54,9 +54,9 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int', state_size='int',
-            free='float[4]', state0l='float[:, :]',
-            diffs0l='float[:, :]', diffs1l='float[:, :]',
-            diffs2l='float[:, :]', diffs3l='float[:, :]',
+            free='float[4]', state0l='float[:, ::1]',
+            diffs0l='float[:, ::1]', diffs1l='float[:, ::1]',
+            diffs2l='float[:, ::1]', diffs3l='float[:, ::1]',
             values='float[4]',
             state0='float*', state1='float*', state2='float*',
             state3='float*', state4='float*',

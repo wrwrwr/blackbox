@@ -22,8 +22,8 @@ class Bot(BaseBot):
     @ccall
     @returns('void')
     @locals(steps='int', step='int', action='int',
-            features='int', feature='int', choices='int[:]', choice='int',
-            free='float[:, :]', state0l='float[:, :, :]',
+            features='int', feature='int', choices='int[::1]', choice='int',
+            free='float[:, ::1]', state0l='float[:, :, ::1]',
             state0='float*', state0f='float')
     def act(self, steps):
         features = self.level['features']

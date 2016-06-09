@@ -1,4 +1,3 @@
-from copy import deepcopy
 from libc.math cimport ceil, sqrt
 
 from cython import ccall, cclass, locals, returns, wraparound
@@ -36,6 +35,9 @@ class BaseBot:
     entries, parameter arrays get an additional inner-most axis collecting
     the values from all parameter sets. If parameters without the additional
     axis are loaded, the array is repeated with the same entry for each set.
+
+    All arrays are guaranteed to be C-contiguous, so you may avoid stride
+    calculations for the last index (use ::1 in Cython).
     """
     multi = False
 
@@ -137,7 +139,8 @@ class BaseBot:
                                     "Wrong parameter shape (single " +
                                     "'{}', got {}, expected {})".format(
                                         target_key, param.shape, target_shape))
-                    self.params[target_key] = deepcopy(param)
+                    # NumPy's ndarray.copy() ensures C contiguity.
+                    self.params[target_key] = param.copy()
 
         for key, scale in param_scale.items():
             self.params[key] *= scale
@@ -171,7 +174,7 @@ class BaseBot:
         bot.param_multipliers = self.param_multipliers
         bot.param_choices = self.param_choices
         bot.choices = self.choices
-        bot.params = deepcopy(self.params)
+        bot.params = {k: p.copy() for k, p in self.params.items()}
         if state:
             bot.last_action = self.last_action
         else:

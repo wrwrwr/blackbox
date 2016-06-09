@@ -66,8 +66,8 @@ class Bot(BaseBot):
     @returns('void')
     @locals(steps='int', step='int', action='int',
             features='int', feature='int',
-            free='float[4]', state0l='float[:, :]', belief0l='float[4]',
-            belief_free='float', belief_state0l='float[:]',
+            free='float[4]', state0l='float[:, ::1]', belief0l='float[4]',
+            belief_free='float', belief_state0l='float[::1]',
             belief_belief0l='float', belief='float',
             values='float[4]', state0='float*', state0f='float')
     def act(self, steps):
