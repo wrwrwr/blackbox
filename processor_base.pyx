@@ -6,6 +6,8 @@ class BaseProcessor:
     """
     Abstract processor class, defines the interface.
     """
+    formats = ()
+
     @locals(data='tuple')
     def __init__(self, data):
         """
@@ -19,6 +21,11 @@ class BaseProcessor:
         actions and steps in the set.
         """
         self.data = data
+        for _, meta in data:
+            if meta['collector'] not in self.formats:
+                formats_desc = ", ".join(self.formats)
+                raise ValueError(("Can only process data from the {} " +
+                                  "collector(s)").format(formats_desc))
         # WA: Cython doesn't like just "data" in the following three.
         self.max_steps = max(m['level']['steps'] for _, m in self.data)
         self.max_actions = max(m['level']['actions'] for _, m in self.data)

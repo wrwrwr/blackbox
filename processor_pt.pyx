@@ -12,6 +12,8 @@ from processor_base cimport BaseProcessor
 
 @cclass
 class Processor(BaseProcessor):
+    formats = ('ssa',)
+
     @ccall
     @returns('object')
     def process(self):
