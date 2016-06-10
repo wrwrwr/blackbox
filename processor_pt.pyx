@@ -17,8 +17,6 @@ class Processor(BaseProcessor):
     @ccall
     @returns('object')
     def process(self):
-        bots = []
-        levels = []
         action_counts = zeros(self.max_actions, dtype='i4')
         action_rewards = zeros(self.max_actions, dtype='f4')
         phase5_rewards = zeros(5, dtype='f4')
@@ -30,8 +28,6 @@ class Processor(BaseProcessor):
 
         for record, meta in self.data:
             steps = meta['level']['steps']
-            bots.append(meta['bot'])
-            levels.append(meta['level']['key'])
             rewards = diff(record['scores'])
             for step, action in enumerate(record['actions']):
                 reward = rewards[step]
