@@ -71,7 +71,7 @@ if __name__ == '__main__':
             out = ("\nDate: {date}\n" +
                    "Collector: {collector}\n" +
                    "Level: {level}\n" +
-                   "Bot: {bot[1]}\n" +
+                   "Bot: {bot[0]} {bot[1]}\n" +
                    "Time: {time}\n" +
                    "Output: {output}, PRNGs: {prngs_seed}\n").format(**info)
         print(out, flush=True)
