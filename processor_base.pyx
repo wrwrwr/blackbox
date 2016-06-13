@@ -21,15 +21,17 @@ class BaseProcessor:
         actions and steps in the set.
         """
         self.data = data
-        for _, meta in data:
+        self.records, self.meta = zip(*data)
+        for meta in self.meta:
             if meta['collector'] not in self.formats:
                 formats_desc = ", ".join(self.formats)
                 raise ValueError(("Can only process data from the {} " +
                                   "collector(s)").format(formats_desc))
-        # WA: Cython doesn't like just "data" in the following three.
-        self.max_steps = max(m['level']['steps'] for _, m in self.data)
-        self.max_actions = max(m['level']['actions'] for _, m in self.data)
-        self.max_features = max(m['level']['features'] for _, m in self.data)
+        self.bots = tuple(m['bot'] for m in self.meta)
+        self.levels = tuple(m['level'] for m in self.meta)
+        self.max_steps = max(l['steps'] for l in self.levels)
+        self.max_actions = max(l['actions'] for l in self.levels)
+        self.max_features = max(l['features'] for l in self.levels)
 
     @ccall
     @returns('tuple')
@@ -38,12 +40,10 @@ class BaseProcessor:
         """
         Common parts of processors output (meta information on records).
         """
-        # WA: Cython's compiler crashes if the following are generators.
-        bots = ["{} {}".format(*m['bot']) for _, m in self.data]
-        levels = [m['level']['key'] for _, m in self.data]
-        return (("bots", ", ".join(bots)),
-                ("levels", ", ".join(levels)),
-                *entries)
+        # WA: Cython's complains if the lists are replaced with generators.
+        return ((("bots", ", ".join(["{} {}".format(*b) for b in self.bots])),
+                 ("levels", ", ".join([l['key'] for l in self.levels]))) +
+                 entries)
 
     @ccall
     @returns('object')

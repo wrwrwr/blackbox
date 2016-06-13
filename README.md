@@ -295,6 +295,12 @@ Are the state components independent from each other?
 
 [corrs]: processor_corrs.pyx
 
+### [phases][]
+
+Is the level composed of smaller sublevels?
+
+[phases]: processor_phases.pyx
+
 ### [pt][]
 
 What was going on during that playthrough?

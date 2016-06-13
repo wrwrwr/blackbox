@@ -1,6 +1,6 @@
 cdef class BaseProcessor:
     cdef:
-        tuple data
+        tuple data, records, meta, levels, bots
         int max_steps, max_actions, max_features
 
     cpdef tuple results(self, tuple)
